@@ -2,8 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 //Declaracion de estructura de guardian con los datos que se necesitan para ser cargados desde el archivo
@@ -16,15 +18,6 @@ struct Guardian
 	
 };
 
-struct Ciudad {
-    char Nombre[80];
-    char Conexion[50];
-};
-
-struct NodoCiudad {
-    struct Ciudad ciudad;
-    struct NodoCiudad* siguiente;
-};
 
 //************Fin declaracion de estructuras********
 
@@ -58,8 +51,8 @@ void CargaInformacion(const string &Archivocarga, Arbol &arbol) {
     Archivo.close();
 }
 
-//En esta funcion se recorre el arbol creado a partir de los datos del archivo y luego se procede a imprimirlo en el formato que se necesite.
-//En este caso se busca imprimirlos en orden jerarquico.
+/*En esta funcion se recorre el arbol creado a partir de los datos del archivo y luego se procede a imprimirlo en el formato que se necesite.
+ En este caso se busca imprimirlos en orden jerarquico.*/
 void imprimirArbol(const Arbol &arbol, const string &raiz, int nivel) {
     if (arbol.find(raiz) == arbol.end()) {
         return;
@@ -100,57 +93,67 @@ Ranking* CrearRank(int data)
 
 //**********Funcionalidades grafo Ciudades********
 
+using Grafo = unordered_map<string, unordered_set<string>>;
 
-//*******Carga de info hacia lista de ciudades********
-void CargainfoCiudades(NodoCiudad*& listaCiudades) {
-    FILE* file = fopen("Ciudades.txt", "r");
+void CargaInfociudades(const string &CargaArchivo, Grafo &grafo, unordered_set<string> &ciudadesUnicas) {
+    ifstream archivo(CargaArchivo);
 
-    if (file == NULL) {
-        perror("No existe archivo .txt");
+    if (!archivo.is_open()) {
+        cout << "Error al abrir el archivo '" << CargaArchivo << "'.";
         return;
     }
 
-    struct NodoCiudad* iterador = NULL;
+    string linea;
+    while (getline(archivo, linea)) {
+        istringstream ss(linea);
+        string ciudad1, ciudad2;
+        getline(ss, ciudad1, ',');
+        getline(ss, ciudad2);
 
-    // Asignacion de variables a la lista
-    int iterar = 0; // Inicializamos a 0
+        // Agregar conexiones al grafo no dirigido
+        grafo[ciudad1].insert(ciudad2);
+        grafo[ciudad2].insert(ciudad1);
 
-    while (iterar < 60) {
-        struct NodoCiudad* nuevoNodo = new NodoCiudad; 
-        if (fscanf(file, "%79[^,], %49[^\n]\n",
-                   nuevoNodo->ciudad.Nombre,
-                   nuevoNodo->ciudad.Conexion) == 2) {
-            nuevoNodo->siguiente = NULL;
-            if (listaCiudades == NULL) {
-                listaCiudades = nuevoNodo;
-                iterador = listaCiudades; // Iterador apunta al primer nodo
-            } else {
-                iterador->siguiente = nuevoNodo;
-                iterador = iterador->siguiente; // El nuevo nodo es ahora el ultimo elemento
-            }
+        // Agregar ciudades al conjunto
+        ciudadesUnicas.insert(ciudad1);
+        ciudadesUnicas.insert(ciudad2);
+    }
 
-            iterar++;
-        } else {
-            break;
+    archivo.close();
+}
+
+void imprimirGrafo(const Grafo &grafo) {
+    cout << "Grafo de Ciudades:\n";
+    for (const auto &par : grafo) {
+        cout << par.first << ": ";
+        for (const auto &vecino : par.second) {
+            cout << vecino << " ";
         }
-    }
-
-    fclose(file);
-}
-
-void printCiudades(const NodoCiudad* listaCiudades) {
-    const NodoCiudad* current = listaCiudades;
-    while (current != NULL) {
-        cout << "Ciudad: " << current->ciudad.Nombre << ", Conexion: " << current->ciudad.Conexion << endl;
-        current = current->siguiente;
+        cout << "\n";
     }
 }
 
-//******Fin funcionalidades Lista Ciudades*******
+void imprimirMatrizAdyacenciaConLetras(const unordered_set<string> &ciudadesUnicas, const Grafo &grafo, const unordered_map<string, char> &ciudadLetra) {
+    cout << "\nMatriz de Adyacencia con letras:\n";
 
+    // Imprimir encabezado
+    cout << "   ";
+    for (const auto &ciudad : ciudadesUnicas) {
+        cout << ciudadLetra.at(ciudad) << " ";
+    }
+    cout << "\n";
 
-//*******Funcionalidades grafo para matriz*******
+    // Imprimir filas de la matriz
+    for (const auto &ciudad : ciudadesUnicas) {
+        cout << ciudadLetra.at(ciudad) << ": ";
+        for (const auto &otraCiudad : ciudadesUnicas) {
+            cout << (grafo.at(ciudad).count(otraCiudad) > 0 ? "1 " : "0 ");
+        }
+        cout << "\n";
+    }
+}
 
+//*********Fin funcionalidades para grafo*******
 
 
 // Funcion para agregar ejes y crear grafo de las ciudades
@@ -180,6 +183,18 @@ int main()
 	
 	struct NodoCiudad *listaCiudades = NULL;
 	
+	Grafo grafo;
+    unordered_set<string> ciudadesUnicas;
+    CargaInfociudades("ciudades.txt", grafo, ciudadesUnicas);
+    
+    // Asignar letras a las ciudades
+	unordered_map<string, char> ciudadLetra;
+	char letra = 'A';
+	for (const auto &ciudad : ciudadesUnicas) 
+	{
+		ciudadLetra[ciudad] = letra;
+		++letra;
+	}
 	
 	do
 	{
@@ -197,8 +212,15 @@ int main()
 				break;
 				
 			case 2: 
-				CargainfoCiudades(listaCiudades);
-    			printCiudades(listaCiudades);
+			
+			    // En este for se asignan las letras a las ciudades
+			    cout << "\nNomenclatura de letras \n";
+			    for (const auto &par : ciudadLetra) {
+			        cout << par.second << ":" << par.first << "\n";
+			    }
+			
+				// Imprimir la matriz asignada
+				imprimirMatrizAdyacenciaConLetras(ciudadesUnicas, grafo, ciudadLetra);
 				break;
 			
 			case 3:
