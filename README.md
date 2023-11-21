@@ -1,2 +1,5 @@
 # Travel-Of-Guardians
- Proyecto Unidad 2 Algoritmos
+ ##esto es un sub titulo
+ ###esto es texto de mas complementario
+
+ #*Super importante*
