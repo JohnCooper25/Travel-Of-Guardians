@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <set>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -15,6 +16,22 @@ struct Guardian
 	string Maestro;
 	string Ciudad;
 	
+};
+
+//Declaracion de estructura de guardian para funcionamiento del ranking.
+struct Guardian_Ranking {
+    string Nombre;
+    int Poder;
+    string Maestro;
+    string Ciudad;
+};
+
+//Estructura para realizar la comparativa del poder de los guardianes que se encuentran dentro de la estructura "Guardian_Ranking"
+struct CompareGuardians {
+    bool operator()(const Guardian_Ranking& g1, const Guardian_Ranking& g2) const {
+        // Comparar por cantidad de poder de forma descendente
+        return g1.Poder > g2.Poder;
+    }
 };
 
 
@@ -32,7 +49,8 @@ void CargaInformacion(const string &Archivocarga, Arbol &arbol) {
         cout << "Error al abrir el archivo '" << Archivocarga << "'.";
         return;
     }
-
+	
+	//Asignamos la informacion extraida a las variables de la estructura Guardian
     string linea;
     while (getline(Archivo, linea)) {
         istringstream ss(linea);
@@ -69,18 +87,13 @@ void imprimirArbol(const Arbol &arbol, const string &raiz, int nivel) {
 }
 //***************Fin funcionalidades Jerarquia**********
 
-//***********Funcionalidades arbol binario**********
-
-
-
-//*********Fin funcionalidades arbol Binario.********
-
 //**********Funcionalidades grafo Ciudades********
 
 typedef pair<string, string> Ciudad;
 typedef unordered_map<string, char> Representaciones;
 typedef unordered_map<string, int> Indices;
 
+//En este vector leemos el archivo .txt asignado a la variable "archivo" el cual es asignado con el nombre del archivo.
 vector<Ciudad> leerCiudades(const string &archivo) {
     vector<Ciudad> ciudades;
     ifstream f(archivo);
@@ -89,7 +102,8 @@ vector<Ciudad> leerCiudades(const string &archivo) {
         cerr << "No se pudo encontrar el archivo: " << archivo << endl;
         return ciudades;
     }
-
+	
+	//aca tomamos los nombres de las ciudades y los asignamos a las variables para luego identificar las conexiones entre ellas
     string linea;
     while (getline(f, linea)) {
         size_t pos = linea.find(',');
@@ -104,6 +118,7 @@ vector<Ciudad> leerCiudades(const string &archivo) {
     return ciudades;
 }
 
+//Funcion que utiliza la informacion recopilada en el vector Ciudad para luego tomar los datos y extraerlos para utilizarlos como indices
 vector<string> obtenerNombresCiudades(const vector<Ciudad> &ciudades) {
     Indices indices;
     vector<string> nombres;
@@ -122,12 +137,14 @@ vector<string> obtenerNombresCiudades(const vector<Ciudad> &ciudades) {
     return nombres;
 }
 
+//Esta funcion recorren e imprime la matriz de adyacencia del grafo de las ciudades
 void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres, const Representaciones &representaciones) {
     Indices indices;
     for (size_t i = 0; i < nombres.size(); ++i) {
         indices[nombres[i]] = i;
     }
-
+	
+	//toma las representaciones de los nombres en la matriz
     vector<vector<char>> matriz(nombres.size(), vector<char>(nombres.size(), '-'));
 
     for (const Ciudad &c : ciudades) {
@@ -139,6 +156,7 @@ void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres
 
     Representaciones representaciones_copy = representaciones; // Copia de representaciones
 	
+	//A continuacion se muestra la matriz creada con las representaciones de las letras por ciudad y las conexiones que tiene cada una.
 	cout<<"\nMatriz de Adyacencia Ciudades"<<endl;
 	
     cout << "  ";
@@ -188,14 +206,57 @@ int main()
 	
 	Arbol arbol;
 	
-	string archivo = "Ciudades.txt";
-    vector<Ciudad> ciudades = leerCiudades(archivo);
-    vector<std::string> nombres = obtenerNombresCiudades(ciudades);
+	//**********Funcionalidades para grafo de ciudades**************
+	
+	string archivo = "Ciudades.txt";//se declara archivo con el nombre del archivo .txt que se necesita
+    vector<Ciudad> ciudades = leerCiudades(archivo);//aplicamos la funcion para leer el archivo deseado
+    vector<std::string> nombres = obtenerNombresCiudades(ciudades);//Obtenemos los nombres de las ciudades por medio de la funcion llamada
 
-    Representaciones representaciones;
-    for (size_t i = 0; i < nombres.size(); ++i) {
+    Representaciones representaciones;// aca se declara la variable para las representaciones de las ciudades por medio de letras
+    
+    //En este for recorremos las ciudades y asignamos una letra a cada una para ser representada correctamente en la matriz
+	for (size_t i = 0; i < nombres.size(); ++i) {
         representaciones[nombres[i]] = i < 26 ? static_cast<char>('A' + i) : static_cast<char>('a' + i - 26);
     }
+    
+    //***************Fin funcionalidades para grafo de ciudades*************
+    
+    
+    //**************Inicio Funcionalidades para Ranking*******************
+    
+    multiset<Guardian_Ranking, CompareGuardians> guardianRanking; // Multiset para permitir duplicados y no provocar omision de informacion
+    
+    ifstream archivo2("Guardianes.txt");// se asigna el nombre del archivo que se utiliza para extraer los datos.
+    
+    //Dentro de este if se verifica si se encuentra el archivo, para luego de haberlo encontrado asignar los datos correspondientes a cada variable de la estructura Guardian_Ranking
+    if (!archivo2.is_open()) {
+			        cout << "Error al abrir el archivo 'Guardianes.txt'.";
+			        return 1;
+			    }
+			
+			    // Lee la primera linea  y la descarta
+			    string encabezado;
+			    getline(archivo2, encabezado);
+				
+				//aca asignamos las datos a sus variables correspondientes.
+			    string linea;
+			    while (getline(archivo2, linea)) {
+			        istringstream ss(linea);
+			        Guardian_Ranking guardian;
+			        getline(ss, guardian.Nombre, ',');
+			        ss >> guardian.Poder;
+			        ss.ignore(); // Ignorar las comas despues del poder
+			        getline(ss, guardian.Maestro, ',');
+			        getline(ss, guardian.Ciudad);
+			
+			        guardianRanking.insert(guardian);
+			    }
+			
+	archivo2.close();
+	
+	int posicion = 1;
+	
+	//*************Fin funcionalidades para Ranking***************
 	
 	do
 	{
@@ -227,7 +288,14 @@ int main()
 				
 			case 2: 
 			
-			    cout<< "Hola";
+			    // Mostrar el ranking
+			    cout << "Guardianes Ranking (Ordenados por Poder de Mayor a Menor):\n";
+			    
+			    //se recorre el arbol Guardian_Ranking para mostrar la informacion del ranking.
+			    for (const Guardian_Ranking& guardian : guardianRanking) {
+			        cout << posicion << ". " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
+			        posicion++;
+			    }
 				break;
 			
 			case 3:
