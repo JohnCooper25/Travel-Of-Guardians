@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -21,7 +20,7 @@ struct Guardian
 
 //************Fin declaracion de estructuras********
 
-/*****Funcionamiento de jerarquia guardianes.*****/
+/*****Funcionamiento de jerarquia guardianes*****/
 
 using Arbol = unordered_map<string, vector<Guardian>>;//Codigo para generacion del mapa del arbol en base a un vector.
 
@@ -71,85 +70,93 @@ void imprimirArbol(const Arbol &arbol, const string &raiz, int nivel) {
 //***************Fin funcionalidades Jerarquia**********
 
 //***********Funcionalidades arbol binario**********
-/*Por medio de esta funcion ordenaremos segun el nivel de poder los guardianes.*/
-struct Ranking
-{
-	int data;
-	Ranking* left;
-	Ranking* right;	
-};
 
-//Funcion para crear nodos en el ranking.
-Ranking* CrearRank(int data)
-{
-	Ranking* Nuevorank = new Ranking;
-	Nuevorank -> data = data;
-	Nuevorank -> left = NULL;
-	Nuevorank -> right = NULL;
-	return Nuevorank;
-}
+
 
 //*********Fin funcionalidades arbol Binario.********
 
 //**********Funcionalidades grafo Ciudades********
 
-using Grafo = unordered_map<string, unordered_set<string>>;
+typedef pair<string, string> Ciudad;
+typedef unordered_map<string, char> Representaciones;
+typedef unordered_map<string, int> Indices;
 
-void CargaInfociudades(const string &CargaArchivo, Grafo &grafo, unordered_set<string> &ciudadesUnicas) {
-    ifstream archivo(CargaArchivo);
+vector<Ciudad> leerCiudades(const string &archivo) {
+    vector<Ciudad> ciudades;
+    ifstream f(archivo);
 
-    if (!archivo.is_open()) {
-        cout << "Error al abrir el archivo '" << CargaArchivo << "'.";
-        return;
+    if (!f.is_open()) {
+        cerr << "No se pudo encontrar el archivo: " << archivo << endl;
+        return ciudades;
     }
 
     string linea;
-    while (getline(archivo, linea)) {
-        istringstream ss(linea);
-        string ciudad1, ciudad2;
-        getline(ss, ciudad1, ',');
-        getline(ss, ciudad2);
-
-        // Agregar conexiones al grafo no dirigido
-        grafo[ciudad1].insert(ciudad2);
-        grafo[ciudad2].insert(ciudad1);
-
-        // Agregar ciudades al conjunto
-        ciudadesUnicas.insert(ciudad1);
-        ciudadesUnicas.insert(ciudad2);
+    while (getline(f, linea)) {
+        size_t pos = linea.find(',');
+        if (pos != string :: npos) {
+            string ciudad1 = linea.substr(0, pos);
+            string ciudad2 = linea.substr(pos + 1);
+            ciudades.push_back(Ciudad(ciudad1, ciudad2));
+        }
     }
 
-    archivo.close();
+    f.close();
+    return ciudades;
 }
 
-void imprimirGrafo(const Grafo &grafo) {
-    cout << "Grafo de Ciudades:\n";
-    for (const auto &par : grafo) {
-        cout << par.first << ": ";
-        for (const auto &vecino : par.second) {
-            cout << vecino << " ";
+vector<string> obtenerNombresCiudades(const vector<Ciudad> &ciudades) {
+    Indices indices;
+    vector<string> nombres;
+
+    for (const Ciudad &c : ciudades) {
+        if (indices.find(c.first) == indices.end()) {
+            indices[c.first] = nombres.size();
+            nombres.push_back(c.first);
         }
-        cout << "\n";
+        if (indices.find(c.second) == indices.end()) {
+            indices[c.second] = nombres.size();
+            nombres.push_back(c.second);
+        }
     }
+
+    return nombres;
 }
 
-void imprimirMatrizAdyacenciaConLetras(const unordered_set<string> &ciudadesUnicas, const Grafo &grafo, const unordered_map<string, char> &ciudadLetra) {
-    cout << "\nMatriz de Adyacencia con letras:\n";
-
-    // Imprimir encabezado
-    cout << "   ";
-    for (const auto &ciudad : ciudadesUnicas) {
-        cout << ciudadLetra.at(ciudad) << " ";
+void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres, const Representaciones &representaciones) {
+    Indices indices;
+    for (size_t i = 0; i < nombres.size(); ++i) {
+        indices[nombres[i]] = i;
     }
-    cout << "\n";
 
-    // Imprimir filas de la matriz
-    for (const auto &ciudad : ciudadesUnicas) {
-        cout << ciudadLetra.at(ciudad) << ": ";
-        for (const auto &otraCiudad : ciudadesUnicas) {
-            cout << (grafo.at(ciudad).count(otraCiudad) > 0 ? "1 " : "0 ");
+    vector<vector<char>> matriz(nombres.size(), vector<char>(nombres.size(), '-'));
+
+    for (const Ciudad &c : ciudades) {
+        int i = indices[c.first];
+        int j = indices[c.second];
+        matriz[i][j] = representaciones.at(c.second);
+        matriz[j][i] = representaciones.at(c.first);
+    }
+
+    Representaciones representaciones_copy = representaciones; // Copia de representaciones
+	
+	cout<<"\nMatriz de Adyacencia Ciudades"<<endl;
+	
+    cout << "  ";
+    for (size_t i = 0; i < nombres.size(); ++i) {
+        cout << representaciones_copy[nombres[i]] << " ";
+    }
+    cout << endl;
+
+    for (size_t i = 0; i < nombres.size(); ++i) {
+        cout << representaciones_copy[nombres[i]] << " ";
+        for (size_t j = 0; j < nombres.size(); ++j) {
+            if (matriz[i][j] == '-') {
+                cout << "0 ";
+            } else {
+                cout << "1 ";
+            }
         }
-        cout << "\n";
+        cout << std::endl;
     }
 }
 
@@ -181,20 +188,14 @@ int main()
 	
 	Arbol arbol;
 	
-	struct NodoCiudad *listaCiudades = NULL;
-	
-	Grafo grafo;
-    unordered_set<string> ciudadesUnicas;
-    CargaInfociudades("ciudades.txt", grafo, ciudadesUnicas);
-    
-    // Asignar letras a las ciudades
-	unordered_map<string, char> ciudadLetra;
-	char letra = 'A';
-	for (const auto &ciudad : ciudadesUnicas) 
-	{
-		ciudadLetra[ciudad] = letra;
-		++letra;
-	}
+	string archivo = "Ciudades.txt";
+    vector<Ciudad> ciudades = leerCiudades(archivo);
+    vector<std::string> nombres = obtenerNombresCiudades(ciudades);
+
+    Representaciones representaciones;
+    for (size_t i = 0; i < nombres.size(); ++i) {
+        representaciones[nombres[i]] = i < 26 ? static_cast<char>('A' + i) : static_cast<char>('a' + i - 26);
+    }
 	
 	do
 	{
@@ -206,21 +207,27 @@ int main()
 		switch(menu)
 		{
 			case 1:
-				CargaInformacion("Guardianes.txt", arbol);
-				cout << "arbol de Personajes:\n";
+				//*******Carga informacion de guardianes***********
+				
+				CargaInformacion("Guardianes.txt", arbol);//Se realiza el llamado a la funcion correspondiente para realizar la carga de archivo segun su nombre y tipo.
+				cout << "Arbol de Personajes:\n";
     			imprimirArbol(arbol, "None", 0);
-				break;
+    			
+    			//*********Asignacion e impresion de matriz*********
+    			
+    			mostrarMatriz(ciudades, nombres, representaciones);//Mostramos la matriz con la informacion de las conexiones entre las ciudades.
+    			
+    			//En este codigo se asigna la nomenclatura de a que ciudad equivale cada letra en la matriz.
+			    cout << "Nomenclatura: " << endl;
+				for (size_t i = 0; i < nombres.size(); ++i) {
+				    cout << representaciones[nombres[i]] << " = " << nombres[i] << endl;
+				}
+    			
+    			break;
 				
 			case 2: 
 			
-			    // En este for se asignan las letras a las ciudades
-			    cout << "\nNomenclatura de letras \n";
-			    for (const auto &par : ciudadLetra) {
-			        cout << par.second << ":" << par.first << "\n";
-			    }
-			
-				// Imprimir la matriz asignada
-				imprimirMatrizAdyacenciaConLetras(ciudadesUnicas, grafo, ciudadLetra);
+			    cout<< "Hola";
 				break;
 			
 			case 3:
