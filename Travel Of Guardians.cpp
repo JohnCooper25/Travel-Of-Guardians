@@ -178,159 +178,9 @@ void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres
     }
 }
 
-void mostrarMatrizActualizada(const vector<vector<int>> &matrizAdyacencia, const vector<string> &nombres, const Representaciones &representaciones)
-{
-    cout << "\nMatriz de Adyacencia Ciudades Actualizada:\n";
-    cout << "  ";
-    for (const string &nombre : nombres)
-    {
-        cout << representaciones.at(nombre) << " ";
-    }
-    cout << endl;
-
-    for (size_t i = 0; i < nombres.size(); ++i)
-    {
-        cout << representaciones.at(nombres[i]) << " ";
-        for (size_t j = 0; j < nombres.size(); ++j)
-        {
-            cout << matrizAdyacencia[i][j] << " ";
-        }
-        cout << std::endl;
-    }
-}
-
 //*********Fin funcionalidades para grafo*******
 
-
-// Funcion para agregar ejes y crear grafo de las ciudades
-void addEdge(vector<vector<int>>& graph, int u, int v) {
-graph[u][v] = 1;
-graph[v][u] = 1;
-}
-
-// Funcion para imprimir la matriz de adyacencia
-/*Por medio de esta funcion vamos a mostrar la matriz con las conexiones que tiene cada ciudad con otra.*/
-void printGraph(const vector<vector<int>>& graph) {
-	cout << "Matriz de adyacencia:\n";
-	for (const auto& row : graph) {
-		for (int val : row) {
-		cout << val << " ";
-		}
-	cout << '\n';
-	}
-}
-
 //*********Funcionalidades de Conocer el reino*************
-
-//En esta funcion el usuario ingresa 2 ciudades en las que desea crear un camino, luego se verifica si existe o no el camino y si no se crea para luego verlo reflejado en la matriz.
-void crearNuevosCaminos(vector<vector<int>> &matrizAdyacencia, const vector<string> &nombres, const Representaciones &representaciones)
-{
-    // Muestra la nomenclatura de las ciudades
-    cout << "Nomenclatura de Ciudades:\n";
-    for (size_t i = 0; i < nombres.size(); ++i)
-    {
-        cout << representaciones.at(nombres[i]) << " = " << nombres[i] << endl;
-    }
-
-    string ciudad1, ciudad2;
-
-    // Pide al usuario que ingrese el nombre de las dos ciudades
-    cout << "Ingrese la letra que representa la primera ciudad: ";
-    cin >> ciudad1;
-
-    cout << "Ingrese la letra que representa la segunda ciudad: ";
-    cin >> ciudad2;
-
-    // Verifica si ambas ciudades existen
-    auto it1 = find_if(representaciones.begin(), representaciones.end(),
-                       [&ciudad1](const pair<string, char> &p) { return p.second == ciudad1[0]; });
-
-    auto it2 = find_if(representaciones.begin(), representaciones.end(),
-                       [&ciudad2](const pair<string, char> &p) { return p.second == ciudad2[0]; });
-
-    if (it1 == representaciones.end() || it2 == representaciones.end())
-    {
-        cout << "Al menos una de las ciudades ingresadas no existe. Verifique las letras e intente nuevamente.\n";
-        return;
-    }
-
-    // Obtiene los índices de las ciudades en la matriz de adyacencia
-	int indiceCiudad1, indiceCiudad2;
-	
-	// Convertir la letra ingresada por el usuario a índice directamente
-	if (ciudad1[0] >= 'A' && ciudad1[0] <= 'Z')
-	{
-	    indiceCiudad1 = ciudad1[0] - 'A';
-	}
-	else if (ciudad1[0] >= 'a' && ciudad1[0] <= 'z')
-	{
-	    indiceCiudad1 = ciudad1[0] - 'a' + 26;
-	}
-	else
-	{
-	    cout << "Letra no válida para la primera ciudad.\n";
-	    return;
-	}
-	
-	if (ciudad2[0] >= 'A' && ciudad2[0] <= 'Z')
-	{
-	    indiceCiudad2 = ciudad2[0] - 'A';
-	}
-	else if (ciudad2[0] >= 'a' && ciudad2[0] <= 'z')
-	{
-	    indiceCiudad2 = ciudad2[0] - 'a' + 26;
-	}
-	else
-	{
-	    cout << "Letra no válida para la segunda ciudad.\n";
-	    return;
-	}
-	
-	// Verifica que los índices estén dentro de los límites de la matriz
-	if (indiceCiudad1 >= matrizAdyacencia.size() || indiceCiudad2 >= matrizAdyacencia[indiceCiudad1].size())
-	{
-	    cout << "Error: Índices fuera de límites.\n";
-	    cout << "Índice Ciudad 1: " << indiceCiudad1 << ", Índice Ciudad 2: " << indiceCiudad2 << endl;
-	    return;
-	}
-	
-	// Actualiza la matriz de adyacencia para reflejar el nuevo camino
-	matrizAdyacencia[indiceCiudad1][indiceCiudad2] = 1;
-	matrizAdyacencia[indiceCiudad2][indiceCiudad1] = 1;
-
-    // Impresiones adicionales para verificar conexiones
-    cout << "Conexiones actuales:\n";
-    for (size_t i = 0; i < nombres.size(); ++i)
-    {
-        for (size_t j = 0; j < nombres.size(); ++j)
-        {
-            cout << matrizAdyacencia[i][j] << " ";
-        }
-        cout << endl;
-    }
-
-    cout << "Conexión creada entre las ciudades " << representaciones.at(nombres[indiceCiudad1]) << " y " << representaciones.at(nombres[indiceCiudad2]) << endl;
-
-    // Muestra la matriz de adyacencia actualizada
-    cout << "\nMatriz de Adyacencia Ciudades Actualizada:\n";
-    cout << "  ";
-    for (const string &nombre : nombres)
-    {
-        cout << representaciones.at(nombre) << " ";
-    }
-    cout << endl;
-
-    for (int i = 0; i < matrizAdyacencia.size(); ++i)
-    {
-        cout << representaciones.at(nombres[i]) << " ";
-        for (int j = 0; j < matrizAdyacencia[i].size(); ++j)
-        {
-            cout << matrizAdyacencia[i][j] << " ";
-        }
-        cout << endl;
-    }
-}
-
 
 //Dentro de esta funcion se encuentra un menu con opciones disponibles para el usuario en las cuales puede realizar consultas generales acerca de las ciudades.
 void ConocerElReino(vector<string> &nombres, const Representaciones &representaciones, multiset<Guardian_Ranking, CompareGuardians> &guardianRanking)
@@ -341,7 +191,6 @@ void ConocerElReino(vector<string> &nombres, const Representaciones &representac
     cout << "(1)Viajar a traves del Reino.\n(2)Crear Nuevos Caminos.\n(3)Consultar Caminos Existentes.\n(0)Salir.\n";
     cin >> opcion;
 
-    size_t numCiudades = nombres.size();
 
     switch (opcion)
     {
@@ -474,7 +323,7 @@ int main()
 			
 			case 4: 
 				cout<<"Ahora el 4 subnormal.";
-				mostrarMatrizActualizada(matrizAdyacencia, nombres, representaciones);
+			
 				break;
 				
 			case 5:
