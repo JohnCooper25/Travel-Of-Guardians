@@ -183,36 +183,96 @@ void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres
 //*********Funcionalidades de Conocer el reino*************
 
 //Dentro de esta funcion se encuentra un menu con opciones disponibles para el usuario en las cuales puede realizar consultas generales acerca de las ciudades.
-void ConocerElReino(vector<string> &nombres, const Representaciones &representaciones, multiset<Guardian_Ranking, CompareGuardians> &guardianRanking)
-{
-    int opcion;
+void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Representaciones &representaciones)  {
+    
+	int opcion;
+    string ciudadElegida;
+    
+    string ciudad1, ciudad2;
+    
     cout << "Escoja la accion que desea realizar:" << endl;
-
-    cout << "(1)Viajar a traves del Reino.\n(2)Crear Nuevos Caminos.\n(3)Consultar Caminos Existentes.\n(0)Salir.\n";
+    cout << "(1) Mostrar Ciudades y Conexiones.\n(2) Crear Nuevos Caminos.\n(3) Consultar Caminos Existentes.\n(0) Salir.\n";
     cin >> opcion;
 
+    switch (opcion) {
+        case 1:
+            // Mostrar todas las ciudades existentes
+            cout << "Ciudades Disponibles:\n";
+            for (const string &ciudad : nombres) {
+                cout << "- " << ciudad << endl;
+            }
 
-    switch (opcion)
-    {
-    case 1:
-        cout << "Viajar";
-        break;
+            // Permitir al jugador elegir una ciudad
+            
+            cout << "Ingrese el nombre de la ciudad que desea explorar: ";
+            cin.ignore(); 
+            getline(cin, ciudadElegida);
 
-    case 2:
-        //cout <<"Crear";
-        crearNuevosCaminos(matrizAdyacencia, nombres, representaciones);
-        break;
+            // Mostrar las conexiones de la ciudad elegida
+            cout << "Conexiones de la Ciudad " << ciudadElegida << ":\n";
+            for (const Ciudad &conexion : ciudades) {
+                if (conexion.first == ciudadElegida || conexion.second == ciudadElegida) {
+                    string otraCiudad = (conexion.first == ciudadElegida) ? conexion.second : conexion.first;
+                    cout << "- Conectada con " << otraCiudad << endl;
+                }
+            }
+            break;
 
-    case 3:
-        cout << "Consultar";
-        break;
+        case 2:
+            {
+			    cout << "Crear Nuevos Caminos:\n";
+			    mostrarMatriz(ciudades, nombres, representaciones);
+			
+			    cout << "Nomenclatura: " << endl;
+			    for (size_t i = 0; i < nombres.size(); ++i) {
+			        cout << representaciones[nombres[i]] << " = " << nombres[i] << endl;
+			    }
+			
+			    // Solicitar al usuario que elija dos ciudades para crear una conexion
+			    cout << "Ingrese el nombre de la primera ciudad: ";
+			    cin.ignore();
+				getline(cin, ciudad1);
+				
+				cout << "Ingrese el nombre de la segunda ciudad: ";
+				getline(cin, ciudad2);
+				
+				// Convertir las letras ingresadas a mayúsculas
+				ciudad1 = toupper(ciudad1[0]);
+				ciudad2 = toupper(ciudad2[0]);
+				
+				// Agregar salidas de depuración
+				cout << "Ciudad 1: " << ciudad1 << endl;
+				cout << "Ciudad 2: " << ciudad2 << endl;
+				
+				// Verificar que las ciudades existen
+				auto it1 = find(nombres.begin(), nombres.end(), ciudad1);
+				auto it2 = find(nombres.begin(), nombres.end(), ciudad2);
+				
+				cout << "Encontrado 1: " << (it1 != nombres.end()) << endl;
+				cout << "Encontrado 2: " << (it2 != nombres.end()) << endl;
+				
+			if (it1 == nombres.end() || it2 == nombres.end()) {
+			    cout << "Error: Una o ambas ciudades no existen.\n";
+			    return;
+			}			
+			    // Crear la conexion en la matriz de adyacencia
+			    ciudades.push_back({ *it1, *it2 });
+			    mostrarMatriz(ciudades, nombres, representaciones);
+    break;
+			}
 
-    case 0:
-        cout << "Saliendo al menu";
-        break;
+        case 3:
+            cout << "Consultar Caminos Existentes.\n";
+            // Implementar la lógica para consultar caminos existentes
+            break;
 
-    default:
-        cout << "Opcion no valida";
+        case 0:
+            cout << "Saliendo al menu principal.\n";
+            break;
+
+        default:
+            cout << "Opcion no valida.\n";
+            break;
     }
 }
 
@@ -225,9 +285,11 @@ int main()
 	
 	//**********Funcionalidades para grafo de ciudades**************
 	
-	vector<vector<int>> matrizAdyacencia;
-	string archivo = "Ciudades.txt";//se declara archivo con el nombre del archivo .txt que se necesita
-    vector<Ciudad> ciudades = leerCiudades(archivo);//aplicamos la funcion para leer el archivo deseado
+	//vector<vector<int>> matrizAdyacencia;
+	string archivo = "Ciudades.txt";   //se declara archivo con el nombre del archivo .txt que se necesita
+	
+    vector<Ciudad> ciudades = leerCiudades(archivo);  //aplicamos la funcion para leer el archivo deseado
+    
     vector<string> nombres = obtenerNombresCiudades(ciudades);//Obtenemos los nombres de las ciudades por medio de la funcion llamada
 
     Representaciones representaciones;// aca se declara la variable para las representaciones de las ciudades por medio de letras
@@ -274,6 +336,11 @@ int main()
 	
 	int posicion = 1;
 	
+	bool encontrado = false;
+	string nombreGuardianElegido;
+	// Buscar el guardián en el árbol
+	Guardian guardianElegido;
+	
 	//*************Fin funcionalidades para Ranking***************
 	
 	do
@@ -317,13 +384,54 @@ int main()
 				break;
 			
 			case 3:
-				//cout<<"Hola";
-				ConocerElReino(matrizAdyacencia, nombres, representaciones, guardianRanking);
+				// Mostrar todos los guardianes disponibles
+			    cout << "Lista de Guardianes Disponibles:\n";
+			    for (const auto& pair : arbol) {
+			        for (const Guardian& guardian : pair.second) {
+			            cout << "- " << guardian.Nombre << endl;
+			        }
+			    }
+			
+			    // Solicitar al jugador que elija un guardian
+			    cout << "Ingrese el nombre del guardian que desea ver: ";
+			    cin.ignore(); 
+			    getline(cin, nombreGuardianElegido);
+			
+			    // Evitamos problemas de mayusculas y minusculas
+			    transform(nombreGuardianElegido.begin(), nombreGuardianElegido.end(), nombreGuardianElegido.begin(), ::tolower);
+			
+			    for (const auto& pair : arbol) {
+			        for (const Guardian& guardian : pair.second) {
+			            // Convertir a minusculas para evitar problemas 
+			            string nombreGuardianActual = guardian.Nombre;
+			            transform(nombreGuardianActual.begin(), nombreGuardianActual.end(), nombreGuardianActual.begin(), ::tolower);
+			
+			            if (nombreGuardianActual == nombreGuardianElegido) {
+			                guardianElegido = guardian;
+			                encontrado = true;
+			                break;
+			            }
+			        }
+			        if (encontrado) {
+			            break;
+			        }
+			    }
+			
+			    // Mostrar detalles del guardian elegido
+			    if (encontrado) {
+			        cout << "Detalles del Guardian:\n";
+			        cout << "Nombre: " << guardianElegido.Nombre << endl;
+			        cout << "Poder: " << guardianElegido.Poder << endl;
+			        cout << "Maestro: " << guardianElegido.Maestro << endl;
+			        cout << "Ciudad: " << guardianElegido.Ciudad << endl;
+			    } else {
+			        cout << "Guardian no encontrado.\n";
+			    }
 				break;
 			
 			case 4: 
 				cout<<"Ahora el 4 subnormal.";
-			
+				ConocerElReino(ciudades, nombres, representaciones);
 				break;
 				
 			case 5:
