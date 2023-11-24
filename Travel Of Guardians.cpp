@@ -139,13 +139,12 @@ vector<string> obtenerNombresCiudades(const vector<Ciudad> &ciudades) {
 }
 
 //Esta funcion recorren e imprime la matriz de adyacencia del grafo de las ciudades
-void mostrarMatriz(const vector<Ciudad> &ciudades, const vector<string> &nombres, const Representaciones &representaciones) {
-    
-	Indices indices;
+void mostrarMatriz(const vector<Ciudad>& ciudades, const vector<string>& nombres, Representaciones& representaciones) {
+    Indices indices;
     for (size_t i = 0; i < nombres.size(); ++i) {
         indices[nombres[i]] = i;
     }
-    
+
     // Actualizar representaciones para incluir nuevas ciudades si es necesario
     for (const Ciudad& conexion : ciudades) {
         if (representaciones.find(conexion.first) == representaciones.end()) {
