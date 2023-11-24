@@ -198,25 +198,25 @@ bool encontrarCamino(const vector<Ciudad>& ciudades, const string& ciudadOrigen,
     camino.push_back(ciudadOrigen);
 
     if (ciudadOrigen == ciudadDestino) {
-        // Hemos llegado al destino, se encontró un camino
+        // Hemos llegado al destino, se encontro un camino
         return true;
     }
 
     for (const Ciudad& conexion : ciudades) {
         if (conexion.first == ciudadOrigen && visitadas.find(conexion.second) == visitadas.end()) {
-            // Intentar seguir el camino por la conexión
+            // Intentar seguir el camino por la conexion
             if (encontrarCamino(ciudades, conexion.second, ciudadDestino, visitadas, camino)) {
                 return true;
             }
         } else if (conexion.second == ciudadOrigen && visitadas.find(conexion.first) == visitadas.end()) {
-            // Intentar seguir el camino por la conexión
+            // Intentar seguir el camino por la conexion
             if (encontrarCamino(ciudades, conexion.first, ciudadDestino, visitadas, camino)) {
                 return true;
             }
         }
     }
 
-    // No se encontró un camino desde este punto, retroceder
+    // No se encontro un camino desde este punto, retroceder
     visitadas.erase(ciudadOrigen);
     camino.pop_back();
     return false;
@@ -276,7 +276,7 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		    cout << "Ingrese el nombre de la segunda ciudad: ";
 		    getline(cin, ciudad2);
 		
-		    // Verificar si la conexión ya existe
+		    // Verificar si la conexion ya existe
 		    bool conexionExistente = false;
 		    for (const Ciudad& conexion : ciudades) {
 		        if ((conexion.first == ciudad1 && conexion.second == ciudad2) || (conexion.first == ciudad2 && conexion.second == ciudad1)) {
@@ -286,19 +286,19 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		    }
 		
 		    if (conexionExistente) {
-		        cout << "La conexión entre " << ciudad1 << " y " << ciudad2 << " ya existe.\n";
+		        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " ya existe.\n";
 		    } else {
-		        cout << "¿Desea crear una nueva conexión entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
+		        cout << "¿Desea crear una nueva conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
 		        cin >> nuevaConexion;
 		
 		        if (nuevaConexion == 'S' || nuevaConexion == 's') {
-		            // Agregar la nueva conexión al vector de ciudades
+		            // Agregar la nueva conexion al vector de ciudades
 		            ciudades.push_back(Ciudad(ciudad1, ciudad2));
 		
 		            // Mostrar la matriz de adyacencia actualizada
 		            mostrarMatriz(ciudades, nombres, representaciones);
 		        } else {
-		            cout << "No se creó una nueva conexión.\n";
+		            cout << "No se creo una nueva conexion.\n";
 		        }
 		    }
 		    break;		
@@ -428,15 +428,21 @@ int main()
 	
 	int posicion = 1;
 	
+	//Bool para comprobar la busqueda de guardian
 	bool encontrado = false;
+	//Guarda el guardian elegido a buscar
 	string nombreGuardianElegido;
-	// Buscar el guardián en el árbol
+	
+	// Buscar el guardian en el arbol
 	Guardian guardianElegido;
 	
 	//*************Fin funcionalidades para Ranking***************
 	
 	do
 	{
+		
+		nombreGuardianElegido = "";  // Reiniciar el nombre del guardian elegido
+    	encontrado = false;
 		cout << "Hola, Escoja la accion que desea realizar: "<<endl;
 	
 		cout<< "(1)Carga de informacion Guardianes(jerarquia).\n(2)Ver Lista de Candidatos.\n(3)Ver al Guardian.\n(4)Conocer el reino.\n(5)Presenciar una batalla.\n(0)Salir"<<endl;
@@ -473,6 +479,7 @@ int main()
 			        cout << posicion << ". " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
 			        posicion++;
 			    }
+			    break;
 			case 3:
 				// Mostrar todos los guardianes disponibles
 			    cout << "Lista de Guardianes Disponibles:\n";
@@ -519,8 +526,7 @@ int main()
 			    }
 				break;
 			
-			case 4: 
-				cout<<"Ahora el 4 subnormal.";
+			case 4:
 				ConocerElReino(ciudades, nombres, representaciones);
 				break;
 				
