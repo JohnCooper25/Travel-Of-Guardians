@@ -193,66 +193,6 @@ void mostrarMatriz(const vector<Ciudad>& ciudades, const vector<string>& nombres
 
 //*********Funcionalidades de Conocer el reino*************
 
-/*bool encontrarCamino(const vector<Ciudad>& ciudades, const string& ciudadOrigen, const string& ciudadDestino, set<string>& visitadas, vector<string>& camino) {
-    visitadas.insert(ciudadOrigen);
-    camino.push_back(ciudadOrigen);
-
-    if (ciudadOrigen == ciudadDestino) {
-        // Hemos llegado al destino, se encontro un camino
-        return true;
-    }
-
-    for (const Ciudad& conexion : ciudades) {
-        if (conexion.first == ciudadOrigen && visitadas.find(conexion.second) == visitadas.end()) {
-            // Intentar seguir el camino por la conexion
-            if (encontrarCamino(ciudades, conexion.second, ciudadDestino, visitadas, camino)) {
-                return true;
-            }
-        } else if (conexion.second == ciudadOrigen && visitadas.find(conexion.first) == visitadas.end()) {
-            // Intentar seguir el camino por la conexion
-            if (encontrarCamino(ciudades, conexion.first, ciudadDestino, visitadas, camino)) {
-                return true;
-            }
-        }
-    }
-
-    // No se encontro un camino desde este punto, retroceder
-    visitadas.erase(ciudadOrigen);
-    camino.pop_back();
-    return false;
-}*/
-
-bool encontrarCamino(const vector<Ciudad>& ciudades, const string& ciudadOrigen, const string& ciudadDestino, set<string>& visitadas, vector<string>& camino) {
-    visitadas.insert(ciudadOrigen);
-    camino.push_back(ciudadOrigen);
-
-    if (ciudadOrigen == ciudadDestino) {
-        // Hemos llegado al destino, se encontró un camino
-        return true;
-    }
-
-    for (const Ciudad& conexion : ciudades) {
-        const string& ciudadA = conexion.first;
-        const string& ciudadB = conexion.second;
-
-        if ((ciudadA == ciudadOrigen || ciudadB == ciudadOrigen) &&
-            visitadas.find((ciudadA == ciudadOrigen) ? ciudadB : ciudadA) == visitadas.end()) {
-            // Intentar seguir el camino por la conexión
-            const string& siguienteCiudad = (ciudadA == ciudadOrigen) ? ciudadB : ciudadA;
-            cout << "Intentando conexión entre " << ciudadOrigen << " y " << siguienteCiudad << endl;
-            
-            if (encontrarCamino(ciudades, siguienteCiudad, ciudadDestino, visitadas, camino)) {
-                return true;
-            }
-        }
-    }
-
-    // No se encontró un camino desde este punto, retroceder
-    visitadas.erase(ciudadOrigen);
-    camino.pop_back();
-    return false;
-}
-
 
 //Dentro de esta funcion se encuentra un menu con opciones disponibles para el usuario en las cuales puede realizar consultas generales acerca de las ciudades.
 void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Representaciones &representaciones)  {
@@ -263,7 +203,7 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
     string ciudad1, ciudad2;
     
     cout << "Escoja la accion que desea realizar:" << endl;
-    cout << "(1) Mostrar Ciudades y Conexiones.\n(2) Crear Nuevos Caminos.\n(3) Consultar Caminos Existentes.\n(0) Salir.\n(4)Eliminar Caminos.\n";
+    cout << "(1) Mostrar Ciudades y Conexiones.\n(2) Crear Nuevos Caminos.\n(3) Consultar Rutas entre ciudades.\n(4)Eliminar Caminos.\n(0) Salir.\n";
     cin >> opcion;
 
     switch (opcion) {
@@ -335,121 +275,57 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		    break;		
 		}
         case 3:
-            {
-            cout << "Ciudades Disponibles:\n";
-		    for (const string& ciudad : nombres) {
-		        cout << "- " << ciudad << endl;
+	    {
+	    cout << "Ciudades Disponibles:\n";
+	    for (const string& ciudad : nombres) {
+	        cout << "- " << ciudad << endl;
+	    }
+	
+	    string ciudadOrigen, ciudadDestino;
+	    cout << "Ingrese el nombre de la ciudad de origen: ";
+	    cin.ignore();
+	    getline(cin, ciudadOrigen);
+	
+	    cout << "Ingrese el nombre de la ciudad de destino: ";
+	    getline(cin, ciudadDestino);
+	
+	    // Verificar si las ciudades estan conectadas
+		bool conexionDirecta = false;
+		for (const Ciudad& conexion : ciudades) {
+		    if ((conexion.first == ciudadOrigen && conexion.second == ciudadDestino) ||
+		        (conexion.first == ciudadDestino && conexion.second == ciudadOrigen)) {
+		        conexionDirecta = true;
+		        break;
 		    }
+		}
 		
-		    string ciudadOrigen, ciudadDestino;
 		
-		    cout << "Ingrese el nombre de la ciudad de origen: ";
-		    cin.ignore();
-		    getline(cin, ciudadOrigen);
-		
-		    cout << "Ingrese el nombre de la ciudad de destino: ";
-		    getline(cin, ciudadDestino);
-		
-		    // Verificar si las ciudades estan conectadas
-		    set<string> visitadas;
-		    vector<string> camino;
-		    bool conexionEncontrada = encontrarCamino(ciudades, ciudadOrigen, ciudadDestino, visitadas, camino);
-		
-		    if (conexionEncontrada) {
-		        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " estan conectadas por el siguiente camino:\n";
-		        for (const string& ciudad : camino) {
-		            cout << "- " << ciudad << endl;
-		        }
-		    } else {
-		        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " no estan directamente conectadas. Buscando camino alternativo...\n";
-		
-		        // Encontrar un camino alternativo
-		        set<string> visitadasAlternativo;
-		        vector<string> caminoAlternativo;
-		        bool conexionAlternativaEncontrada = false;
-		
-		        for (const string& otraCiudad : nombres) {
-		            if (otraCiudad != ciudadOrigen && otraCiudad != ciudadDestino) {
-		                conexionAlternativaEncontrada = encontrarCamino(ciudades, ciudadOrigen, otraCiudad, visitadasAlternativo, caminoAlternativo) &&
-		                                                encontrarCamino(ciudades, otraCiudad, ciudadDestino, visitadasAlternativo, caminoAlternativo);
-		                if (conexionAlternativaEncontrada) {
-		                    break;
-		                }
-		            }
-		        }
-		
-		        if (conexionAlternativaEncontrada) {
-		            cout << "Se encontro un camino alternativo pasando por la ciudad " << caminoAlternativo[1] << ":\n";
-		            for (const string& ciudad : caminoAlternativo) {
-		                cout << "- " << ciudad << endl;
-		            }
-		        } else {
-		            cout << "No se encontro un camino alternativo. Las ciudades no estan conectadas.\n";
-		        }
-		    }
-		    break;	
-        	}
-        	
-        case 4:
-        	{
-        		cout << "Ciudades Disponibles:\n";
-		    for (const string& ciudad : nombres) {
-		        cout << "- " << ciudad << endl;
-		    }
-		
-		    string ciudad1, ciudad2;
-		    char eliminarConexion;
-		
-		    cout << "Ingrese el nombre de la primera ciudad: ";
-		    cin.ignore();
-		    getline(cin, ciudad1);
-		
-		    cout << "Ingrese el nombre de la segunda ciudad: ";
-		    getline(cin, ciudad2);
-		
-		    // Verificar si la conexión existe
-		    bool conexionExistente = false;
-		    for (auto it = ciudades.begin(); it != ciudades.end(); ++it) {
-		        if ((it->first == ciudad1 && it->second == ciudad2) || (it->first == ciudad2 && it->second == ciudad1)) {
-		            conexionExistente = true;
-		            cout << "Conexion encontrada entre " << ciudad1 << " y " << ciudad2 << ". ¿Desea eliminarla? (S/N): ";
-		            cin >> eliminarConexion;
-		
-		            if (eliminarConexion == 'S' || eliminarConexion == 's') {
-		                // Eliminar la conexión del vector de ciudades
-		                ciudades.erase(it);
-		
-		                // Mostrar la matriz de adyacencia actualizada
-		                mostrarMatriz(ciudades, nombres, representaciones);
-		
-		                cout << "La conexión entre " << ciudad1 << " y " << ciudad2 << " ha sido eliminada.\n";
-		            }
-		            else {
-		                cout << "No se eliminó la conexión.\n";
-		            }
-		            break;
-		        }
-		    }
-		
-		    if (!conexionExistente) {
-		        cout << "No se encontró una conexión entre " << ciudad1 << " y " << ciudad2 << ".\n";
-		    }
-		    break;
-		
-        		
+		// Mostrar ruta sugerida
+		cout << "Ruta sugerida: " << ciudadOrigen;
+		for (const Ciudad& conexion : ciudades) {
+		    if (conexion.first == ciudadOrigen) {
+		        cout << " -> " << conexion.second << " -> " << ciudadDestino << endl;
+		        break;
+		    } 
+			else if (conexion.second == ciudadOrigen) 
+			{
+		        cout << " -> " << conexion.first << " -> " << ciudadDestino << endl;
+		        break;
 			}
 			
-			
-        case 0:
-            cout << "Saliendo al menu principal.\n";
-            break;
-
-        default:
-            cout << "Opcion no valida.\n";
-            break;
+			}
+		}
+	    	
+        case 4:        
+    	break;
+    	
+    	case 0:
+    		cout<< "Saliendo al menu";
+			break;
+		default :
+			cout<<"Opcion no disponible.";			    
     }
 }
-
 
 int main()
 {
