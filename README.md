@@ -34,18 +34,19 @@ Para llevar a cabo esta funcionalidad se necesitan de 3 pasos super importantes:
 ### Conocer el Reino.
 En esta opcion se le muestra el siguiente menu de acciones a realizar al usuario:
 
-- Ver matriz de adyacencia => Por medio de esta accion se le muestra la matriz de adyacencia del grafo de ciudades al usuario. Esto con el fin de que este mismo pueda ver las ciudades que estan conectadas entre si, para realizarlo se debe imprimir dicha estructura la cual contiene todos los datos de las conexiones entre ciudades los cuales provienen desde su archivo correspondiente.
+- Mostrar Ciduades y Conexiones => Por medio de esta accion se le muestra la matriz de adyacencia del grafo de ciudades al usuario. Esto con el fin de que este mismo pueda ver las ciudades que estan conectadas entre si, para realizarlo se debe imprimir dicha estructura la cual contiene todos los datos de las conexiones entre ciudades los cuales provienen desde su archivo correspondiente.
   
 - Crear nuevos caminos => Para esta accion se necesita que el usuario seleccione las ciudades que desea conectar para poder realizar el cambio correspondiente en la matriz de adyacencia. Con este fin se debe recibir ambos datos y agregarlos como nuevas aristas entre los 2 vertices de las ciudades seleccionadas.
 
-- Viajar por el reino => En esta accion se le permite al usuario seleccionar una ciudad para luego mostrarle los datos acerca de esta misma. Ya sean su nombre y las distintas conexiones que posee con otras ciudades.
+- Viajar por el reino => En esta accion se le permite al usuario seleccionar una ciudad para luego mostrarle los datos acerca de esta misma. Ya sean su nombre y las distintas conexiones que posee con otras ciudades. En el caso de no existir una conexion directa, se le entrega al usuario una ruta alternativa la cual involucra visitar otras ciudades con las que tiene conexion para poder llegar al destino deseado. Esto se hace por medio de una funcion que verifica las conexiones que hay entre todas las ciudades y va almacenando los datos de las conexiones recorridas hasta llegar al destino para luego imprimir dicho camino hasta la ciudad deseada.
 
 ### Presenciar una Batalla.
-Es la opcion mas imporante del juego. Debido a que por medio de esta es donde se lleva a cabo la accion. Para esto le presentamos el siguiente menu al usuario:
+Es la opcion mas imporante del juego. Debido a que por medio de esta es donde se lleva a cabo la accion.Primero se le muestra al usuario una lista de todos los guardianes para que escoja el que desea utilizar para pelear o viajar dependiendo lo que desee realizar. Luego de seleccionar el guardian se le presenta una lista de los guardianes que existen en la ciudad en que se encuentra el guardian seleccionado (Es posible que el guardian escogido sea el unico en esa ciudad). Finalmente presentamos el siguiente menu al usuario:
 
+- Pelear => En esta opcion el usuario podra escoger uno de los guardianes que existen en su ciudad para disputar una batalla con el seleccionado, luego de esto se lleva a cabo una simulacion de batalla en la cual existe una probabilidad de 4 a 6 para el local que al ser ambos locales tiene otra condicion la cual seria en base al poder que tienen basicamente. El ganador de la batalla gana una cierta cantidad de puntos de experiencia dependiendo del rango del rival. Si el rival vencido es aprendiz el ganador obtiene 3 puntos de experiencia y por otro lado si es del rango maestro el vencedor gana 5 puntos. En cuanto al perdedor de la batalla pierde 1 punto.
 
+- Viajar => En esta accion el usuario tiene la opcion de viajar con el guardian a una ciudad con la que tenga conexion. Tambien puede escoger crear otro camino para viajar a una ciudad que no este conectada, por otra parte el sistema de pelea es el mismo con la gran diferencia que una vez acabado el duelo la ciudad de origen del guardian que viajo debe ser cambiada debido a que ya no se encuentra en la que estaba anteriormente.
   
-
 ## Solucion.
 Este proyecto se abordo en 3 grandes pasos:
 1. Identificacion.
