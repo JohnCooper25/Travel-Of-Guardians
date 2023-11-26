@@ -1,18 +1,24 @@
-Silverstone City, Hill City
-Silverstone City, Storm City
-Silverstone City, Forest City
-Valley City, Storm City
-Valley City, Forest City
-River City, Forest City
-Capital City, Desert City
-Capital City, Cliff City
-Capital City, Tesla Capital 
-Mountain City, Desert City
-Mountain City, Cliff City
-Coast City, Cliff City
-Coast City, Storm City
-Coast City, Hill City
-Island City, Desert City
-Island City, Hill City
-River City, Hill City
-Sunflower Fields City, Forest City
+Silverstone City,Hill City
+Silverstone City,Storm City
+Silverstone City,Forest City
+Hill City,Tesla Capital
+Hill City,Forest City
+Hill City,Sunflower Fields City
+Forest City,Cliff City
+Valley City,Storm City
+Valley City,Forest City
+Valley City,Tesla Capital
+River City,Tesla Capital
+River City,Forest City
+Capital City,Desert City
+Capital City,Cliff City
+Mountain City,Desert City
+Mountain City,Cliff City
+Mountain City,Tesla Capital
+Coast City,Cliff City
+Coast City,Storm City
+Coast City,Hill City
+Island City,Desert City
+Island City,Hill City
+River City,Hill City
+Sunflower Fields City,Forest City
