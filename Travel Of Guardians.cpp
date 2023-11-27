@@ -260,7 +260,7 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		    if (conexionExistente) {
 		        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " ya existe.\n";
 		    } else {
-		        cout << "¿Desea crear una nueva conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
+		        cout << "Desea crear una nueva conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
 		        cin >> nuevaConexion;
 		
 		        if (nuevaConexion == 'S' || nuevaConexion == 's') {
@@ -301,10 +301,10 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		    }
 		
 		    if (conexionDirecta) {
-		        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " tienen conexión directa.\n";
+		        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " tienen conexion directa.\n";
 		    } 
 			else {
-		        // Implementar BFS para encontrar una ruta sugerida
+		        // BFS
 		        queue<string> cola;
 		        unordered_map<string, string> padres;
 		
@@ -338,35 +338,33 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 		            }
 		        }
 		
-		        
 				// Mostrar la ruta sugerida
-// Mostrar la ruta sugerida
-if (rutaEncontrada) {
-    cout << "Ruta sugerida: ";
-    
-    // Construir la ruta en el orden correcto
-    vector<string> ruta;
-    string ciudadActual = ciudadDestino;
-
-    while (!padres[ciudadActual].empty()) {
-        ruta.push_back(ciudadActual);
-        ciudadActual = padres[ciudadActual];
-    }
-
-    ruta.push_back(ciudadOrigen);  // Añadir la ciudad de origen
-
-    // Imprimir la ruta en el orden correcto
-    for (auto it = ruta.rbegin(); it != ruta.rend(); ++it) {
-        cout << *it;
-        if (next(it) != ruta.rend()) {
-            cout << " -> ";
-        }
-    }
-
-    cout << endl;
-} else {
-    cout << "No se encontró una ruta sugerida.\n";
-}
+				if (rutaEncontrada) {
+				    cout << "Ruta sugerida: ";
+				    
+				    // Construye la ruta en el orden correcto
+				    vector<string> ruta;
+				    string ciudadActual = ciudadDestino;
+				
+				    while (!padres[ciudadActual].empty()) {
+				        ruta.push_back(ciudadActual);
+				        ciudadActual = padres[ciudadActual];
+				    }
+				
+				    ruta.push_back(ciudadOrigen);  // Aniadir la ciudad de origen
+				
+				    // Imprimir la ruta en el orden correcto
+				    for (auto it = ruta.rbegin(); it != ruta.rend(); ++it) {
+				        cout << *it;
+				        if (next(it) != ruta.rend()) {
+				            cout << " -> ";
+				        }
+				    }
+				
+				    cout << endl;
+				} else {
+				    cout << "No se encontro una ruta sugerida.\n";
+				}
 		
 		    break;
 		}
@@ -396,7 +394,7 @@ if (rutaEncontrada) {
 		    });
 		
 		    if (it != ciudades.end()) {
-		        cout << "¿Desea eliminar la conexión entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
+		        cout << "Desea eliminar la conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
 		        cin >> eliminarConexion;
 		
 		        if (eliminarConexion == 'S' || eliminarConexion == 's') {
@@ -406,7 +404,7 @@ if (rutaEncontrada) {
 		            // Mostrar la matriz de adyacencia actualizada
 		            mostrarMatriz(ciudades, nombres, representaciones);
 		        } else {
-		            cout << "No se elimino la conexión.\n";
+		            cout << "No se elimino la conexion.\n";
 		        }
 		    } else {
 		        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " no existe.\n";
@@ -424,10 +422,50 @@ if (rutaEncontrada) {
 
 //**********Fin de funcionalidades Conocer El Reino************
 
-void Batalla()
-{
-	cout<<"Hola escoja la accion que desea realizar: "<<endl;
+void mostrarGuardianesParaBatalla(const Arbol &arbol, const multiset<Guardian_Ranking, CompareGuardians> &guardianRanking) {
+    cout << "Guardianes para Batalla (con menos de 90 puntos y no son maestros):\n";
+
+    for (const Guardian_Ranking &guardian : guardianRanking) {
+        // Verificar que el poder sea menor de 90 y que no sea maestro de ningun aprendiz
+        if (guardian.Poder < 90 && arbol.find(guardian.Nombre) == arbol.end()) {
+            cout << "- " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
+        }
+    }
 }
+
+void Batalla(const Arbol &arbol, const multiset<Guardian_Ranking, CompareGuardians> &guardianRanking) {
+    mostrarGuardianesParaBatalla(arbol, guardianRanking);
+
+    // Solicitar al jugador que elija un guardian
+    string nombreGuardianElegido;
+    cout << "Ingrese el nombre del guardian que desea para la batalla: ";
+    cin.ignore();
+    getline(cin, nombreGuardianElegido);
+
+    // Verificar que el guardian elegido este en la lista y obten su información
+    auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
+        return guardian.Nombre == nombreGuardianElegido;
+    });
+
+    if (itGuardian != guardianRanking.end()) {
+        // Mostrar otros guardianes en la misma ciudad sin incluir al guardian seleccionado
+        string ciudadGuardianElegido = itGuardian->Ciudad;
+
+        cout << "Guardianes en la misma ciudad (" << ciudadGuardianElegido << "):\n";
+        for (const Guardian_Ranking &otroGuardian : guardianRanking) {
+            if (otroGuardian.Ciudad == ciudadGuardianElegido && otroGuardian.Nombre != nombreGuardianElegido) {
+                cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
+            }
+        }
+
+        // Aqui puedes continuar con la implementación de la batalla
+        // ...
+    } else {
+        cout << "Guardian no encontrado en la lista.\n";
+    }
+}
+
+
 
 int main()
 {
@@ -530,16 +568,25 @@ int main()
     			break;
 				
 			case 2: 
+			{
+				 // Mostrar los guardianes con poder entre 90 y 99
+			    cout << "Guardianes con Poder entre 90 y 99 (Ordenados por Poder de Mayor a Menor):\n";
 			
-			    // Mostrar el ranking
-			    cout << "Guardianes Ranking (Ordenados por Poder de Mayor a Menor):\n";
-			    
-			    //se recorre el arbol Guardian_Ranking para mostrar la informacion del ranking.
+			    int posicion = 1;
 			    for (const Guardian_Ranking& guardian : guardianRanking) {
-			        cout << posicion << ". " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
-			        posicion++;
+			        if (guardian.Poder >= 90 && guardian.Poder <= 99) {
+			            cout << posicion << ". " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
+			            posicion++;
+			        }
 			    }
-			    break;
+			
+			    // Si no hay guardianes en el rango, mostrar un mensaje
+			    if (posicion == 1) {
+			        cout << "No hay guardianes con poder entre 90 y 99.\n";
+			    }
+			    break;	
+			}
+			   
 			case 3:
 				// Mostrar todos los guardianes disponibles
 			    cout << "Lista de Guardianes Disponibles:\n";
@@ -591,7 +638,7 @@ int main()
 				break;
 				
 			case 5:
-				cout<<"Este es el ultimo.";
+				Batalla(arbol, guardianRanking);
 				break;
 				
 			case 0:
