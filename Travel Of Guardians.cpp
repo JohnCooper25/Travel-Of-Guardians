@@ -28,11 +28,10 @@ struct Guardian_Ranking {
     string Ciudad;
 };
 
-//Estructura para realizar la comparativa del poder de los guardianes que se encuentran dentro de la estructura "Guardian_Ranking"
+
 struct CompareGuardians {
-    bool operator()(const Guardian_Ranking& g1, const Guardian_Ranking& g2) const {
-        // Comparar por cantidad de poder de forma descendente
-        return g1.Poder > g2.Poder;
+    bool operator()(const Guardian_Ranking& lhs, const Guardian_Ranking& rhs) const {
+        return lhs.Poder > rhs.Poder; // Modifica la lógica según tus necesidades
     }
 };
 
@@ -422,27 +421,35 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 
 //**********Fin de funcionalidades Conocer El Reino************
 
-void mostrarGuardianesParaBatalla(const Arbol &arbol, const multiset<Guardian_Ranking, CompareGuardians> &guardianRanking) {
+bool esMaestroDeAlguien(const string& nombreGuardian, const vector<Guardian_Ranking>& guardianRanking) {
+    // Verificar si el guardian es maestro de algún aprendiz
+    return any_of(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking& guardian) {
+        return guardian.Maestro == nombreGuardian;
+    });
+}
+void mostrarGuardianesParaBatalla(const vector<Guardian_Ranking>& guardianRanking) {
     cout << "Guardianes para Batalla (con menos de 90 puntos y no son maestros):\n";
 
-    for (const Guardian_Ranking &guardian : guardianRanking) {
+    for (const Guardian_Ranking& guardian : guardianRanking) {
         // Verificar que el poder sea menor de 90 y que no sea maestro de ningun aprendiz
-        if (guardian.Poder < 90 && arbol.find(guardian.Nombre) == arbol.end()) {
+        if (guardian.Poder < 90 && !esMaestroDeAlguien(guardian.Nombre, guardianRanking)) {
             cout << "- " << guardian.Nombre << " - Poder: " << guardian.Poder << endl;
         }
     }
 }
 
-void Batalla(const Arbol &arbol, const multiset<Guardian_Ranking, CompareGuardians> &guardianRanking) {
-    mostrarGuardianesParaBatalla(arbol, guardianRanking);
 
+void Batalla(const Arbol &arbol, vector<Guardian_Ranking> &guardianRanking){
+
+    int OPC;
+	mostrarGuardianesParaBatalla(guardianRanking);
     // Solicitar al jugador que elija un guardian
     string nombreGuardianElegido;
     cout << "Ingrese el nombre del guardian que desea para la batalla: ";
     cin.ignore();
     getline(cin, nombreGuardianElegido);
 
-    // Verificar que el guardian elegido este en la lista y obten su información
+    // Verificar que el guardian elegido esté en la lista y obtener su información
     auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
         return guardian.Nombre == nombreGuardianElegido;
     });
@@ -458,8 +465,95 @@ void Batalla(const Arbol &arbol, const multiset<Guardian_Ranking, CompareGuardia
             }
         }
 
-        // Aqui puedes continuar con la implementación de la batalla
-        // ...
+        do {
+            cout << "Escoja la acción que desea realizar: " << endl;
+            cout << "(1) Pelear Con Rivales de la ciudad.\n(2) Viajar.\n(0) Salir al Menú Principal.\n";
+            cin >> OPC;
+
+            switch (OPC) {
+                case 1: 
+				{
+				    // Obtener la ciudad del guardian elegido previamente
+				    auto itGuardianElegido = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
+				        return guardian.Nombre == nombreGuardianElegido;
+				    });
+				
+				    if (itGuardianElegido != guardianRanking.end()) {
+				        // Mostrar otros guardianes en la misma ciudad sin incluir al guardian seleccionado localmente
+				        string ciudadGuardianElegido = itGuardianElegido->Ciudad;
+				
+				        cout << "Guardianes en la misma ciudad (" << ciudadGuardianElegido << ") para la batalla:\n";
+				        for (const Guardian_Ranking &otroGuardian : guardianRanking) {
+				            if (otroGuardian.Ciudad == ciudadGuardianElegido && otroGuardian.Nombre != nombreGuardianElegido) {
+				                cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
+				            }
+				        }
+				
+				        // Solicitar al jugador que elija un guardian contra el que pelear
+				        string nombreGuardianContra;
+				        cout << "Ingrese el nombre del guardian contra el que desea pelear: ";
+				        cin.ignore();
+				        getline(cin, nombreGuardianContra);
+				
+				        // Verificar que el guardian contra el que pelear esté en la lista y obtener su información
+				        auto itGuardianContra = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
+				            return guardian.Nombre == nombreGuardianContra;
+				        });
+				
+				        if (itGuardianContra != guardianRanking.end()) {
+				            // Realizar la simulación del duelo
+				            bool esLocal = ciudadGuardianElegido == itGuardianContra->Ciudad;
+				            double probabilidadGanarLocal = 0.5;  // Probabilidad de ganar si ambos son locales
+				
+				            if (!esLocal) {
+				                probabilidadGanarLocal = 0.4;  // Probabilidad de ganar si el usuario es visitante
+				            }
+				
+				            // Simulación aleatoria
+				            double resultado = ((double)rand() / RAND_MAX);  // Número aleatorio entre 0 y 1
+				
+				            // Mostrar el resultado del duelo
+				            cout << "Duelo!\n";
+				            cout << nombreGuardianElegido << " vs. " << nombreGuardianContra << "\n";
+				
+				            // Modificar puntos de poder según el resultado del duelo
+				            if (resultado < probabilidadGanarLocal) {
+				                // El ganador gana 5 puntos de poder
+				                itGuardianElegido->Poder += 5;
+				                // El perdedor pierde 1 punto de poder
+				                itGuardianContra->Poder -= 1;
+				
+				                cout << nombreGuardianElegido << " gana el duelo!\n";
+				            } else {
+				                // El ganador gana 5 puntos de poder
+				                itGuardianContra->Poder += 5;
+				                // El perdedor pierde 1 punto de poder
+				                itGuardianElegido->Poder -= 1;
+				
+				                cout << nombreGuardianContra << " gana el duelo!\n";
+				            }
+				        } else {
+				            cout << "Guardian contra el que pelear no encontrado en la lista.\n";
+				        }
+				    } else {
+				        cout << "Guardian elegido previamente no encontrado en la lista.\n";
+				    }
+				    break;
+				}
+
+                case 2:
+                    break;
+
+                case 0:
+                    cout << "Volviendo al menú principal..." << endl;
+                    break;
+
+                default:
+                    cout << "Opción no válida";
+                    break;
+            }
+        } while (OPC != 0);
+
     } else {
         cout << "Guardian no encontrado en la lista.\n";
     }
@@ -494,7 +588,7 @@ int main()
     
     //**************Inicio Funcionalidades para Ranking*******************
     
-    multiset<Guardian_Ranking, CompareGuardians> guardianRanking; // Multiset para permitir duplicados y no provocar omision de informacion
+    vector<Guardian_Ranking> guardianRanking; // Multiset para permitir duplicados y no provocar omision de informacion
     
     ifstream archivo2("Guardianes.txt");// se asigna el nombre del archivo que se utiliza para extraer los datos.
     
@@ -518,13 +612,33 @@ int main()
 			        ss.ignore(); // Ignorar las comas despues del poder
 			        getline(ss, guardian.Maestro, ',');
 			        getline(ss, guardian.Ciudad);
-			
-			        guardianRanking.insert(guardian);
+			        
+			    // Lee el resto de las líneas
+				string linea;
+				while (getline(archivo2, linea)) {
+				    istringstream ss(linea);
+				    Guardian_Ranking guardian;
+				    getline(ss, guardian.Nombre, ',');
+				    ss >> guardian.Poder;
+				    ss.ignore(); // Ignorar las comas después del poder
+				    getline(ss, guardian.Maestro, ',');
+				    getline(ss, guardian.Ciudad);
+				
+				    // Agregar el guardian a guardianRanking
+				    guardianRanking.push_back(guardian);
+				}
+				
+				// Ordenar guardianRanking después de cargar todos los guardianes
+				sort(guardianRanking.begin(), guardianRanking.end(), CompareGuardians());    
+							
+							        
 			    }
 			
 	archivo2.close();
 	
 	int posicion = 1;
+	
+	
 	
 	//Bool para comprobar la busqueda de guardian
 	bool encontrado = false;
@@ -638,8 +752,12 @@ int main()
 				break;
 				
 			case 5:
+				{
 				Batalla(arbol, guardianRanking);
 				break;
+					
+				}
+				
 				
 			case 0:
 				cout<<"Cerrando el programa....";
