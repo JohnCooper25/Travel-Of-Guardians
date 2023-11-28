@@ -193,6 +193,209 @@ void mostrarMatriz(const vector<Ciudad>& ciudades, const vector<string>& nombres
 
 //*********Funcionalidades de Conocer el reino*************
 
+// Funcion para mostrar ciudades y conexiones
+void mostrarCiudadesYConexiones(const vector<Ciudad> &ciudades, const vector<string> &nombres) {
+    string ciudadElegida;
+
+    // Mostrar todas las ciudades existentes
+    cout << "Ciudades Disponibles:\n";
+    for (const string &ciudad : nombres) {
+        cout << "- " << ciudad << endl;
+    }
+
+    // Permitir al jugador elegir una ciudad
+    cout << "Ingrese el nombre de la ciudad que desea explorar: ";
+    cin.ignore();
+    getline(cin, ciudadElegida);
+
+    // Mostrar las conexiones de la ciudad elegida
+    cout << "Conexiones de la Ciudad " << ciudadElegida << ":\n";
+    for (const Ciudad &conexion : ciudades) {
+        if (conexion.first == ciudadElegida || conexion.second == ciudadElegida) {
+            string otraCiudad = (conexion.first == ciudadElegida) ? conexion.second : conexion.first;
+            cout << "- Conectada con " << otraCiudad << endl;
+        }
+    }
+}
+
+// Funcion para crear nuevos caminos
+void crearNuevosCaminos(vector<Ciudad> &ciudades, const vector<string> &nombres, Representaciones &representaciones) {
+    string ciudad1, ciudad2;
+    char nuevaConexion;
+
+    cout << "Ciudades Disponibles:\n";
+    for (const string& ciudad : nombres) {
+        cout << "- " << ciudad << endl;
+    }
+	
+    cout << "Ingrese el nombre de la primera ciudad: ";
+    cin.ignore();
+    getline(cin, ciudad1);
+
+    cout << "Ingrese el nombre de la segunda ciudad: ";
+    
+    getline(cin, ciudad2);
+
+    // Verificar si la conexion ya existe
+    bool conexionExistente = false;
+    for (const Ciudad& conexion : ciudades) {
+        if ((conexion.first == ciudad1 && conexion.second == ciudad2) || (conexion.first == ciudad2 && conexion.second == ciudad1)) {
+            conexionExistente = true;
+            break;
+        }
+    }
+
+    if (conexionExistente) {
+        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " ya existe.\n";
+    } else {
+        cout << "Desea crear una nueva conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
+        cin >> nuevaConexion;
+
+        if (nuevaConexion == 'S' || nuevaConexion == 's') {
+            // Agregar la nueva conexion al vector de ciudades
+            ciudades.push_back(Ciudad(ciudad1, ciudad2));
+
+            // Mostrar la matriz de adyacencia actualizada
+            mostrarMatriz(ciudades, nombres, representaciones);
+        } else {
+            cout << "No se creo una nueva conexion.\n";
+        }
+    }
+}
+
+// Función para consultar rutas entre ciudades
+void consultarRutasEntreCiudades(const vector<Ciudad> &ciudades, const vector<string> &nombres) {
+    string ciudadOrigen, ciudadDestino;
+    cout << "Ciudades Disponibles:\n";
+    for (const string &ciudad : nombres) {
+        cout << "- " << ciudad << endl;
+    }
+
+    cout << "Ingrese el nombre de la ciudad de origen: ";
+    cin.ignore();
+    getline(cin, ciudadOrigen);
+
+    cout << "Ingrese el nombre de la ciudad de destino: ";
+    getline(cin, ciudadDestino);
+
+    // Verificar si las ciudades estan conectadas directamente
+    bool conexionDirecta = false;
+    for (const Ciudad &conexion : ciudades) {
+        if ((conexion.first == ciudadOrigen && conexion.second == ciudadDestino) ||
+            (conexion.first == ciudadDestino && conexion.second == ciudadOrigen)) {
+            conexionDirecta = true;
+            break;
+        }
+    }
+
+    if (conexionDirecta) {
+        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " tienen conexion directa.\n";
+    } else {
+        // BFS
+        queue<string> cola;
+        unordered_map<string, string> padres;
+
+        cola.push(ciudadOrigen);
+        padres[ciudadOrigen] = "";
+
+        bool rutaEncontrada = false;
+
+        while (!cola.empty()) {
+            string actual = cola.front();
+            cola.pop();
+
+            for (const Ciudad &conexion : ciudades) {
+                if (conexion.first == actual || conexion.second == actual) {
+                    string vecino = (conexion.first == actual) ? conexion.second : conexion.first;
+
+                    if (padres.find(vecino) == padres.end()) {
+                        cola.push(vecino);
+                        padres[vecino] = actual;
+
+                        if (vecino == ciudadDestino) {
+                            rutaEncontrada = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (rutaEncontrada) {
+                break;
+            }
+        }
+
+        // Mostrar la ruta sugerida
+        if (rutaEncontrada) {
+            cout << "Ruta sugerida: ";
+
+            // Construye la ruta en el orden correcto
+            vector<string> ruta;
+            string ciudadActual = ciudadDestino;
+
+            while (!padres[ciudadActual].empty()) {
+                ruta.push_back(ciudadActual);
+                ciudadActual = padres[ciudadActual];
+            }
+
+            ruta.push_back(ciudadOrigen);  // Añadir la ciudad de origen
+
+            // Imprimir la ruta en el orden correcto
+            for (auto it = ruta.rbegin(); it != ruta.rend(); ++it) {
+                cout << *it;
+                if (next(it) != ruta.rend()) {
+                    cout << " -> ";
+                }
+            }
+
+            cout << endl;
+        } else {
+            cout << "No se encontro una ruta sugerida.\n";
+        }
+    }
+}
+
+// Funcion para eliminar caminos
+void eliminarCaminos(vector<Ciudad> &ciudades, const vector<string> &nombres, Representaciones &representaciones) {
+    string ciudad1, ciudad2;
+    char eliminarConexion;
+
+    cout << "Ciudades Disponibles:\n";
+    for (const string &ciudad : nombres) {
+        cout << "- " << ciudad << endl;
+    }
+
+    cout << "Ingrese el nombre de la primera ciudad: ";
+    cin.ignore();
+    getline(cin, ciudad1);
+
+    cout << "Ingrese el nombre de la segunda ciudad: ";
+    getline(cin, ciudad2);
+
+    // Verificar si la conexion existe
+    auto it = find_if(ciudades.begin(), ciudades.end(), [&](const Ciudad &conexion) {
+        return (conexion.first == ciudad1 && conexion.second == ciudad2) ||
+               (conexion.first == ciudad2 && conexion.second == ciudad1);
+    });
+
+    if (it != ciudades.end()) {
+        cout << "Desea eliminar la conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
+        cin >> eliminarConexion;
+
+        if (eliminarConexion == 'S' || eliminarConexion == 's') {
+            // Eliminar la conexion del vector de ciudades
+            ciudades.erase(it);
+
+            // Mostrar la matriz de adyacencia actualizada
+            mostrarMatriz(ciudades, nombres, representaciones);
+        } else {
+            cout << "No se elimino la conexion.\n";
+        }
+    } else {
+        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " no existe.\n";
+    }
+}
+
 
 //Dentro de esta funcion se encuentra un menu con opciones disponibles para el usuario en las cuales puede realizar consultas generales acerca de las ciudades.
 //Tambien se realizan las principales funcionalidades del grafo, Recorrido,Busqueda,Eliminacion,Agregar una nueva arista.
@@ -210,209 +413,19 @@ void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Represent
 	
 	    switch (opcion) {
 	        case 1:
-	            // Mostrar todas las ciudades existentes
-	            cout << "Ciudades Disponibles:\n";
-	            for (const string &ciudad : nombres) {
-	                cout << "- " << ciudad << endl;
-	            }
-	
-	            // Permitir al jugador elegir una ciudad
-	            
-	            cout << "Ingrese el nombre de la ciudad que desea explorar: ";
-	            cin.ignore(); 
-	            getline(cin, ciudadElegida);
-	
-	            // Mostrar las conexiones de la ciudad elegida
-	            cout << "Conexiones de la Ciudad " << ciudadElegida << ":\n";
-	            for (const Ciudad &conexion : ciudades) {
-	                if (conexion.first == ciudadElegida || conexion.second == ciudadElegida) {
-	                    string otraCiudad = (conexion.first == ciudadElegida) ? conexion.second : conexion.first;
-	                    cout << "- Conectada con " << otraCiudad << endl;
-	                }
-	            }
+	            mostrarCiudadesYConexiones(ciudades, nombres);
 	            break;
 	
 	        case 2:
-	        {
-	        	cout << "Ciudades Disponibles:\n";
-			    for (const string& ciudad : nombres) {
-			        cout << "- " << ciudad << endl;
-			    }
-			
-			    string ciudad1, ciudad2;
-			    char nuevaConexion;
-			
-			    cout << "Ingrese el nombre de la primera ciudad: ";
-			    cin.ignore();
-			    getline(cin, ciudad1);
-			
-			    cout << "Ingrese el nombre de la segunda ciudad: ";
-			    getline(cin, ciudad2);
-			
-			    // Verificar si la conexion ya existe
-			    bool conexionExistente = false;
-			    for (const Ciudad& conexion : ciudades) {
-			        if ((conexion.first == ciudad1 && conexion.second == ciudad2) || (conexion.first == ciudad2 && conexion.second == ciudad1)) {
-			            conexionExistente = true;
-			            break;
-			        }
-			    }
-			
-			    if (conexionExistente) {
-			        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " ya existe.\n";
-			    } else {
-			        cout << "Desea crear una nueva conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
-			        cin >> nuevaConexion;
-			
-			        if (nuevaConexion == 'S' || nuevaConexion == 's') {
-			            // Agregar la nueva conexion al vector de ciudades
-			            ciudades.push_back(Ciudad(ciudad1, ciudad2));
-			
-			            // Mostrar la matriz de adyacencia actualizada
-			            mostrarMatriz(ciudades, nombres, representaciones);
-			        } else {
-			            cout << "No se creo una nueva conexion.\n";
-			        }
-			    }
-			    break;		
-			}
+	        	crearNuevosCaminos(ciudades, nombres, representaciones);
+	        	break;
 	        case 3:
-		    {
-			    cout << "Ciudades Disponibles:\n";
-			    for (const string &ciudad : nombres) {
-			        cout << "- " << ciudad << endl;
-			    }
-			
-			    string ciudadOrigen, ciudadDestino;
-			    cout << "Ingrese el nombre de la ciudad de origen: ";
-			    cin.ignore();
-			    getline(cin, ciudadOrigen);
-			
-			    cout << "Ingrese el nombre de la ciudad de destino: ";
-			    getline(cin, ciudadDestino);
-			
-			    // Verificar si las ciudades están conectadas directamente
-			    bool conexionDirecta = false;
-			    for (const Ciudad &conexion : ciudades) {
-			        if ((conexion.first == ciudadOrigen && conexion.second == ciudadDestino) ||
-			            (conexion.first == ciudadDestino && conexion.second == ciudadOrigen)) {
-			            conexionDirecta = true;
-			            break;
-			        }
-			    }
-			
-			    if (conexionDirecta) {
-			        cout << "Las ciudades " << ciudadOrigen << " y " << ciudadDestino << " tienen conexion directa.\n";
-			        break;
-			    } 
-				else {
-			        // BFS
-			        queue<string> cola;
-			        unordered_map<string, string> padres;
-			
-			        cola.push(ciudadOrigen);
-			        padres[ciudadOrigen] = "";
-			
-			        bool rutaEncontrada = false;
-			
-			        while (!cola.empty()) {
-			            string actual = cola.front();
-			            cola.pop();
-			
-			            for (const Ciudad &conexion : ciudades) {
-			                if (conexion.first == actual || conexion.second == actual) {
-			                    string vecino = (conexion.first == actual) ? conexion.second : conexion.first;
-			
-			                    if (padres.find(vecino) == padres.end()) {
-			                        cola.push(vecino);
-			                        padres[vecino] = actual;
-			
-			                        if (vecino == ciudadDestino) {
-			                            rutaEncontrada = true;
-			                            break;
-			                        }
-			                    }
-			                }
-			            }
-			
-			            if (rutaEncontrada) {
-			                break;
-			            }
-			        }
-			
-					// Mostrar la ruta sugerida
-					if (rutaEncontrada) {
-					    cout << "Ruta sugerida: ";
-					    
-					    // Construye la ruta en el orden correcto
-					    vector<string> ruta;
-					    string ciudadActual = ciudadDestino;
-					
-					    while (!padres[ciudadActual].empty()) {
-					        ruta.push_back(ciudadActual);
-					        ciudadActual = padres[ciudadActual];
-					    }
-					
-					    ruta.push_back(ciudadOrigen);  // Aniadir la ciudad de origen
-					
-					    // Imprimir la ruta en el orden correcto
-					    for (auto it = ruta.rbegin(); it != ruta.rend(); ++it) {
-					        cout << *it;
-					        if (next(it) != ruta.rend()) {
-					            cout << " -> ";
-					        }
-					    }
-					
-					    cout << endl;
-					} else {
-					    cout << "No se encontro una ruta sugerida.\n";
-					}
-			
-			    break;
-			}
-		}
+		    	consultarRutasEntreCiudades(ciudades, nombres);
+		    	break;
 		    	
 	        case 4:  
-			{
-			    cout << "Ciudades Disponibles:\n";
-			    for (const string &ciudad : nombres) {
-			        cout << "- " << ciudad << endl;
-			    }
-			
-			    string ciudad1, ciudad2;
-			    char eliminarConexion;
-			
-			    cout << "Ingrese el nombre de la primera ciudad: ";
-			    cin.ignore();
-			    getline(cin, ciudad1);
-			
-			    cout << "Ingrese el nombre de la segunda ciudad: ";
-			    getline(cin, ciudad2);
-			
-			    // Verificar si la conexion existe
-			    auto it = find_if(ciudades.begin(), ciudades.end(), [&](const Ciudad &conexion) {
-			        return (conexion.first == ciudad1 && conexion.second == ciudad2) ||
-			               (conexion.first == ciudad2 && conexion.second == ciudad1);
-			    });
-			
-			    if (it != ciudades.end()) {
-			        cout << "Desea eliminar la conexion entre " << ciudad1 << " y " << ciudad2 << "? (S/N): ";
-			        cin >> eliminarConexion;
-			
-			        if (eliminarConexion == 'S' || eliminarConexion == 's') {
-			            // Eliminar la conexion del vector de ciudades
-			            ciudades.erase(it);
-			
-			            // Mostrar la matriz de adyacencia actualizada
-			            mostrarMatriz(ciudades, nombres, representaciones);
-			        } else {
-			            cout << "No se elimino la conexion.\n";
-			        }
-			    } else {
-			        cout << "La conexion entre " << ciudad1 << " y " << ciudad2 << " no existe.\n";
-			    }
-			    break;
-			}
+				eliminarCaminos(ciudades, nombres, representaciones);
+				break;
 	    	
 	    	case 0:
 	    		cout<< "Saliendo al menu";
@@ -444,18 +457,30 @@ void mostrarGuardianesParaBatalla(const vector<Guardian_Ranking>& guardianRankin
     }
 }
 
-//Funcion principal de simulacion de batalla.
-//Aca se realizan todas las operaciones requeridas entre arbol binario, general y grafo porque se usan datos de ranking,ciudades y jerarquia de los guardianes.
-void Batalla(const Arbol &arbol, vector<Guardian_Ranking> &guardianRanking) {
+void ConexionesBatalla(const vector<Ciudad> &ciudades, const vector<string> &nombres, const string &ciudadElegida) {
+    // Mostrar las conexiones de la ciudad elegida
+    cout << "Conexiones de la Ciudad " << ciudadElegida << ":\n";
+    for (const Ciudad &conexion : ciudades) {
+        if (conexion.first == ciudadElegida || conexion.second == ciudadElegida) {
+            string otraCiudad = (conexion.first == ciudadElegida) ? conexion.second : conexion.first;
+            cout << "- Conectada con " << otraCiudad << endl;
+        }
+    }
+}
+
+void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombres, vector<Guardian_Ranking> &guardianRanking, Representaciones &representaciones) {
+	
     int OPC;
+    string ciudadDestino;
     mostrarGuardianesParaBatalla(guardianRanking);
+
     // Solicitar al jugador que elija un guardian
     string nombreGuardianElegido;
     cout << "Ingrese el nombre del guardian que desea para la batalla: ";
     cin.ignore();
     getline(cin, nombreGuardianElegido);
 
-    // Verificar que el guardian elegido este en la lista y obtener su informacion
+    // Verificar que el guardian elegido esté en la lista y obtener su información
     auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
         return guardian.Nombre == nombreGuardianElegido;
     });
@@ -470,8 +495,17 @@ void Batalla(const Arbol &arbol, vector<Guardian_Ranking> &guardianRanking) {
                 cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
             }
         }
+    
 
         do {
+        	if(ciudadDestino=="")
+        	{
+        		ciudadGuardianElegido = itGuardian->Ciudad;
+			}
+			else
+			{
+				ciudadGuardianElegido = ciudadDestino;
+			}
             cout << "Escoja la accion que desea realizar: " << endl;
             cout << "(1) Pelear Con Rivales de la ciudad.\n(2) Viajar.\n(0) Salir al Menu Principal.\n";
             cin >> OPC;
@@ -493,19 +527,19 @@ void Batalla(const Arbol &arbol, vector<Guardian_Ranking> &guardianRanking) {
 				    cin.ignore();
 				    getline(cin, nombreOponente);
 				
-				    // Obtener informacion del oponente seleccionado
+				    // Obtener información del oponente seleccionado
 				    auto itOponente = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &oponente) {
 				        return oponente.Nombre == nombreOponente && oponente.Ciudad == ciudadGuardianElegido;
 				    });
 				    
 				   if (itOponente != guardianRanking.end()) 
 				   {
-						// El usuario ha seleccionado un oponente valido 
+						// El usuario ha seleccionado un oponente válido 
 					    
 					    // Verificar si el oponente es maestro de algun guardian
 					    bool esMaestroOponente = esMaestroDeAlguien(itOponente->Nombre, guardianRanking);
 					    
-					    // Generar un numero aleatorio para determinar el resultado del duelo
+					    // Generar un número aleatorio para determinar el resultado del duelo
 					    int resultadoDuelo = rand() % 10 + 1;
 					
 					    if (resultadoDuelo >= 4 && resultadoDuelo <= 6) {
@@ -554,25 +588,78 @@ void Batalla(const Arbol &arbol, vector<Guardian_Ranking> &guardianRanking) {
 			    	break;
 				}
 			
-
                 case 2:
-                	cout <<"Ciudades conectadas a las que puedes viajar:"<<endl;
-                	
-                    break;
-
+				{
+					// Mostrar las ciudades conectadas a la ciudad del guardian elegido al comienzo
+				    ConexionesBatalla(ciudades, nombres, ciudadGuardianElegido);
+				
+				    // Permitir al jugador elegir una ciudad con la que tiene conexión
+				
+				    cout << "Ingrese el nombre de la ciudad a la que desea viajar o Presione 2 veces 'n' para crear un nuevo camino: ";
+				    cin.ignore();
+				    getline(cin, ciudadDestino);
+				
+				    if (ciudadDestino == "n" || ciudadDestino == "N") {
+				        cin.ignore();
+				        crearNuevosCaminos(ciudades, nombres, representaciones);
+				        break;
+				    } else {
+				        // Verificar si las ciudades estan conectadas directamente
+				        bool conexionDirecta = false;
+				        for (const Ciudad &conexion : ciudades) {
+				            if ((conexion.first == ciudadGuardianElegido && conexion.second == ciudadDestino) ||
+				                (conexion.first == ciudadDestino && conexion.second == ciudadGuardianElegido)) {
+				                conexionDirecta = true;
+				                break;
+				            }
+				        }
+				
+				        if (conexionDirecta) 
+						{
+						    cout << "Viajando de " << ciudadGuardianElegido << " a " << ciudadDestino << ".\n";
+						
+						    // Actualizar la ciudad registrada del guardian
+						    auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
+						        return guardian.Nombre == nombreGuardianElegido;
+						    });
+						
+						    if (itGuardian != guardianRanking.end()) {
+						        itGuardian->Ciudad = ciudadDestino;
+						        cout << "Guardian " << nombreGuardianElegido << " ahora se encuentra en la ciudad de " << ciudadDestino << ".\n";
+						    }
+						
+						    // Mostrar los guardianes disponibles en la nueva ciudad después de la actualización de la ciudad del guardian
+						    cout << "Guardianes disponibles en la ciudad de " << ciudadDestino << ":\n";
+						    for (const Guardian_Ranking &otroGuardian : guardianRanking) {
+						        if (otroGuardian.Ciudad == ciudadDestino && otroGuardian.Nombre != nombreGuardianElegido) {
+						            cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
+						        }
+						    }
+						} else {
+						    cout << "Las ciudades " << ciudadGuardianElegido << " y " << ciudadDestino << " no están conectadas directamente.\n";
+						}
+						
+						// Actualizar la ciudad del guardian elegido
+						itGuardian->Ciudad = ciudadDestino;
+				
+				    	break;
+				}
+			}
+				    
+				
                 case 0:
                     cout << "Volviendo al menu principal..." << endl;
                     break;
 
                 default:
-                    cout << "Opción no valida";
+                    cout << "Opción no válida";
                     break;
             }
         } while (OPC != 0);
-
-    } else {
+         } else {
         cout << "Guardian no encontrado en la lista.\n";
     }
+
 }
 
 int main() {
@@ -646,10 +733,6 @@ int main() {
     
     archivo2.close();
     
-    int posicion = 1;
-    
-    //Bool para comprobar la busqueda de guardian
-    bool encontrado = false;
     //Guarda el guardian elegido a buscar
     string nombreGuardianElegido;
     
@@ -660,7 +743,10 @@ int main() {
     
     do {
         nombreGuardianElegido = "";  // Reiniciar el nombre del guardian elegido
-        encontrado = false;
+        
+        //Bool para comprobar la busqueda de guardian
+    	bool encontrado = false;
+    	
         cout << "Hola, Escoja la accion que desea realizar: " << endl;
         
         cout << "(1)Carga de informacion Guardianes(jerarquia).\n(2)Ver Lista de Candidatos.\n(3)Ver al Guardian.\n(4)Conocer el reino.\n(5)Presenciar una batalla.\n(0)Salir" << endl;
@@ -756,7 +842,8 @@ int main() {
 					
 				case 5:
 					{
-					Batalla(arbol, guardianRanking);
+					Batalla(arbol, ciudades, nombres, guardianRanking, representaciones);
+					//Batalla(arbol, guardianRanking);
 					break;
 						
 					}
