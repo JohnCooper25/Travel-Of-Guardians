@@ -90,8 +90,3 @@ A continuacion adjuntamos un link de acceso a un video en youtube en el cual se 
 
 https://github.com/JohnCooper25/Travel-Of-Guardians
 
-
- 
- 
-
-
