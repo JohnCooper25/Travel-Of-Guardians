@@ -1,7 +1,7 @@
 ### GUIA PARA INSTALAR THE CLASH GUARDIANS
 (1) Descargar el programa DevC++ Version 5.11(en esta version se estaba usando)
 
-(2) Ingresar a el repositorio de github "https://github.com/JohnCooper25/The-Clash-Guardians"
+(2) Ingresar a el repositorio de github "https://github.com/JohnCooper25/Travel-Of-Guardians"
 
 (3) Descargar los archivos "Proyecto_U1ex.c" y el archivo "Cartas.txt"
 
