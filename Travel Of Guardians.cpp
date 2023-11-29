@@ -31,7 +31,7 @@ struct Guardian_Ranking {
 
 struct CompareGuardians {
     bool operator()(const Guardian_Ranking& lhs, const Guardian_Ranking& rhs) const {
-        return lhs.Poder > rhs.Poder; // Modifica la logica según tus necesidades
+        return lhs.Poder > rhs.Poder; // Modifica la logica segun tus necesidades
     }
 };
 
@@ -263,7 +263,7 @@ void crearNuevosCaminos(vector<Ciudad> &ciudades, const vector<string> &nombres,
     }
 }
 
-// Función para consultar rutas entre ciudades
+// Funcion para consultar rutas entre ciudades
 void consultarRutasEntreCiudades(const vector<Ciudad> &ciudades, const vector<string> &nombres) {
     string ciudadOrigen, ciudadDestino;
     cout << "Ciudades Disponibles:\n";
@@ -396,7 +396,6 @@ void eliminarCaminos(vector<Ciudad> &ciudades, const vector<string> &nombres, Re
     }
 }
 
-
 //Dentro de esta funcion se encuentra un menu con opciones disponibles para el usuario en las cuales puede realizar consultas generales acerca de las ciudades.
 //Tambien se realizan las principales funcionalidades del grafo, Recorrido,Busqueda,Eliminacion,Agregar una nueva arista.
 void ConocerElReino(vector<Ciudad> &ciudades, vector<string> &nombres, Representaciones &representaciones)  {
@@ -480,7 +479,7 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
     cin.ignore();
     getline(cin, nombreGuardianElegido);
 
-    // Verificar que el guardian elegido esté en la lista y obtener su información
+    // Verificar que el guardian elegido esté en la lista y obtener su informacion
     auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
         return guardian.Nombre == nombreGuardianElegido;
     });
@@ -527,14 +526,14 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
 				    cin.ignore();
 				    getline(cin, nombreOponente);
 				
-				    // Obtener información del oponente seleccionado
+				    // Obtener informacion del oponente seleccionado
 				    auto itOponente = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &oponente) {
 				        return oponente.Nombre == nombreOponente && oponente.Ciudad == ciudadGuardianElegido;
 				    });
 				    
 				   if (itOponente != guardianRanking.end()) 
 				   {
-						// El usuario ha seleccionado un oponente válido 
+						// El usuario ha seleccionado un oponente valido 
 					    
 					    // Verificar si el oponente es maestro de algun guardian
 					    bool esMaestroOponente = esMaestroDeAlguien(itOponente->Nombre, guardianRanking);
@@ -559,7 +558,7 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
 					
 					        // El oponente pierde 1 punto de poder
 					        itOponente->Poder -= 1;
-					        cout << itOponente->Nombre << " ha perdido 1 punto de poder.\n";
+					        cout << itOponente->Nombre << " ha perdido 1 punto de poder.\n"<<endl;
 					
 					    } else {
 					        // El oponente pierde
@@ -578,7 +577,7 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
 					
 					        // El oponente pierde 1 punto de poder
 					        itOponente->Poder -= 1;
-					        cout << itOponente->Nombre << " ha perdido 1 punto de poder.\n";
+					        cout << itOponente->Nombre << " ha perdido 1 punto de poder.\n"<<endl;
 					    }
 				
 					} else {
@@ -590,69 +589,89 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
 			
                 case 2:
 				{
+					 int Accion;
 					// Mostrar las ciudades conectadas a la ciudad del guardian elegido al comienzo
 				    ConexionesBatalla(ciudades, nombres, ciudadGuardianElegido);
 				
-				    // Permitir al jugador elegir una ciudad con la que tiene conexión
-				
-				    cout << "Ingrese el nombre de la ciudad a la que desea viajar o Presione 2 veces 'n' para crear un nuevo camino: ";
-				    cin.ignore();
-				    getline(cin, ciudadDestino);
-				
-				    if (ciudadDestino == "n" || ciudadDestino == "N") {
-				        cin.ignore();
-				        crearNuevosCaminos(ciudades, nombres, representaciones);
-				        break;
-				    } else {
-				        // Verificar si las ciudades estan conectadas directamente
-				        bool conexionDirecta = false;
-				        for (const Ciudad &conexion : ciudades) {
-				            if ((conexion.first == ciudadGuardianElegido && conexion.second == ciudadDestino) ||
-				                (conexion.first == ciudadDestino && conexion.second == ciudadGuardianElegido)) {
-				                conexionDirecta = true;
-				                break;
-				            }
-				        }
-				
-				        if (conexionDirecta) 
-						{
-						    cout << "Viajando de " << ciudadGuardianElegido << " a " << ciudadDestino << ".\n";
-						
-						    // Actualizar la ciudad registrada del guardian
-						    auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
-						        return guardian.Nombre == nombreGuardianElegido;
-						    });
-						
-						    if (itGuardian != guardianRanking.end()) {
-						        itGuardian->Ciudad = ciudadDestino;
-						        cout << "Guardian " << nombreGuardianElegido << " ahora se encuentra en la ciudad de " << ciudadDestino << ".\n";
-						    }
-						
-						    // Mostrar los guardianes disponibles en la nueva ciudad después de la actualización de la ciudad del guardian
-						    cout << "Guardianes disponibles en la ciudad de " << ciudadDestino << ":\n";
-						    for (const Guardian_Ranking &otroGuardian : guardianRanking) {
-						        if (otroGuardian.Ciudad == ciudadDestino && otroGuardian.Nombre != nombreGuardianElegido) {
-						            cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
-						        }
-						    }
-						} else {
-						    cout << "Las ciudades " << ciudadGuardianElegido << " y " << ciudadDestino << " no están conectadas directamente.\n";
-						}
-						
-						// Actualizar la ciudad del guardian elegido
-						itGuardian->Ciudad = ciudadDestino;
-				
-				    	break;
-				}
-			}
+				    // Permitir al jugador elegir una ciudad con la que tiene conexion
 				    
+				    bool conexionDirecta = false;
+				    cout<<"\n(1) Seleccionar Una Ciudad Para Viajar.\n(2) Agregar Nuevo Camino.\n(3) Revisar Conexiones Entre Ciudades.\n(4) Eliminar Caminos Entre Ciudades.\n(5) Consultar Rutas Existentes.\n";
+				    cin >> Accion;
 				
+					switch(Accion)
+					{
+						case 1 :
+							cout << "Ingrese el nombre de la ciudad a la que desea viajar: ";
+						    cin.ignore();
+						    getline(cin, ciudadDestino);
+				
+					        // Verificar si las ciudades estan conectadas directamente
+					        
+					        for (const Ciudad &conexion : ciudades) {
+					            if ((conexion.first == ciudadGuardianElegido && conexion.second == ciudadDestino) ||
+					                (conexion.first == ciudadDestino && conexion.second == ciudadGuardianElegido)) {
+					                conexionDirecta = true;
+					                break;
+					            }
+					        }
+					
+					        if (conexionDirecta) 
+							{
+							    cout << "Viajando de " << ciudadGuardianElegido << " a " << ciudadDestino << ".\n";
+							
+							    // Actualizar la ciudad registrada del guardian
+							    auto itGuardian = find_if(guardianRanking.begin(), guardianRanking.end(), [&](const Guardian_Ranking &guardian) {
+							        return guardian.Nombre == nombreGuardianElegido;
+							    });
+							
+							    if (itGuardian != guardianRanking.end()) {
+							        itGuardian->Ciudad = ciudadDestino;
+							        cout << "Guardian " << nombreGuardianElegido << " ahora se encuentra en la ciudad de " << ciudadDestino << ".\n";
+							    }
+							
+							    // Mostrar los guardianes disponibles en la nueva ciudad después de la actualización de la ciudad del guardian
+							    cout << "Guardianes disponibles en la ciudad de " << ciudadDestino << ":\n";
+							    for (const Guardian_Ranking &otroGuardian : guardianRanking) {
+							        if (otroGuardian.Ciudad == ciudadDestino && otroGuardian.Nombre != nombreGuardianElegido) {
+							            cout << "- " << otroGuardian.Nombre << " - Poder: " << otroGuardian.Poder << endl;
+							        }
+							    }
+							} else {
+							    cout << "Las ciudades " << ciudadGuardianElegido << " y " << ciudadDestino << " no están conectadas directamente.\n";
+							}
+							
+							// Actualizar la ciudad del guardian elegido
+							itGuardian->Ciudad = ciudadDestino;
+						
+							break;
+						
+						case 2 :	
+							crearNuevosCaminos(ciudades, nombres, representaciones);
+				        	break;
+				        	
+				        case 3 :
+				        	mostrarCiudadesYConexiones(ciudades, nombres);
+							break;
+						
+						case 4 : 
+							eliminarCaminos(ciudades, nombres, representaciones);
+							break;
+							
+						case 5 :
+							consultarRutasEntreCiudades(ciudades, nombres);
+							break;			
+						
+					}
+				    break;
+				}
+				    
                 case 0:
                     cout << "Volviendo al menu principal..." << endl;
                     break;
 
                 default:
-                    cout << "Opción no válida";
+                    cout << "Opción no valida";
                     break;
             }
         } while (OPC != 0);
@@ -662,6 +681,8 @@ void Batalla(const Arbol &arbol, vector<Ciudad> &ciudades, vector<string> &nombr
 
 }
 
+//************ Fin de Funcionalidades Batalla****************
+
 int main() {
     int menu;
     
@@ -669,7 +690,6 @@ int main() {
     
     //**********Funcionalidades para grafo de ciudades**************
     
-    //vector<vector<int>> matrizAdyacencia;
     string archivo = "Ciudades.txt";   //se declara archivo con el nombre del archivo .txt que se necesita
     
     vector<Ciudad> ciudades = leerCiudades(archivo);  //aplicamos la funcion para leer el archivo deseado
@@ -843,7 +863,6 @@ int main() {
 				case 5:
 					{
 					Batalla(arbol, ciudades, nombres, guardianRanking, representaciones);
-					//Batalla(arbol, guardianRanking);
 					break;
 						
 					}
