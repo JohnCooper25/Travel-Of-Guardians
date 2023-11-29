@@ -43,10 +43,24 @@ En esta opcion se le muestra el siguiente menu de acciones a realizar al usuario
 ### Presenciar una Batalla.
 Es la opcion mas imporante del juego. Debido a que por medio de esta es donde se lleva a cabo la accion.Primero se le muestra al usuario una lista de todos los guardianes para que escoja el que desea utilizar para pelear o viajar dependiendo lo que desee realizar. Luego de seleccionar el guardian se le presenta una lista de los guardianes que existen en la ciudad en que se encuentra el guardian seleccionado (Es posible que el guardian escogido sea el unico en esa ciudad). Finalmente presentamos el siguiente menu al usuario:
 
-- Pelear => En esta opcion el usuario podra escoger uno de los guardianes que existen en su ciudad para disputar una batalla con el seleccionado, luego de esto se lleva a cabo una simulacion de batalla en la cual existe una probabilidad de 4 a 6 para el local que al ser ambos locales tiene otra condicion la cual seria en base al poder que tienen basicamente. El ganador de la batalla gana una cierta cantidad de puntos de experiencia dependiendo del rango del rival. Si el rival vencido es aprendiz el ganador obtiene 3 puntos de experiencia y por otro lado si es del rango maestro el vencedor gana 5 puntos. En cuanto al perdedor de la batalla pierde 1 punto.
+- Pelear => En esta opcion el usuario podra escoger uno de los guardianes que existen en su ciudad para disputar una batalla con el seleccionado, luego de esto se lleva a cabo una simulacion de batalla en la cual existe una probabilidad de 4 a 6 a favor del desafiante. Una vez concluido el duelo el ganador obtiene puntos de poder dependiendo las siguientes condiciones:
+*Si el Guardian derrotado es aprendiz, es decir, no es maestro de ningun guardian el ganador obtiene 3 puntos de poder.
+*Si el guardian derrotado es Maestro de algun otro guardian. Entonces el ganador obtiene 5 puntos de poder.
 
-- Viajar => En esta accion el usuario tiene la opcion de viajar con el guardian a una ciudad con la que tenga conexion. Tambien puede escoger crear otro camino para viajar a una ciudad que no este conectada, por otra parte el sistema de pelea es el mismo con la gran diferencia que una vez acabado el duelo la ciudad de origen del guardian que viajo debe ser cambiada debido a que ya no se encuentra en la que estaba anteriormente.
+En ambos casos al guardian perdedor se le resta 1 punto de poder.
+
+- Viajar => En esta Opcion se le entrega el siguiente menu de opciones al usuario y tambien se entrega una lista de las ciudades con las que tiene conexion la ciudad del guardian elegido al comienzo de la funcion:
   
+_Selecccionar Ciudad para Viajar_ => Aqui el usuario debe escoger una ciudad de la lista de conexiones proporcionada y una vez seleccionada se realizara el cambio de ciudad del guardian.
+
+_Revisar Conexiones entre ciudades_ => Se ejecuta la funcion que le permite ver conexiones de cualquier ciudad que el escoja.
+
+_Agregar Nuevo Camino_ => Aca se ejecuta la ciudad para generar la conexion que el usuario estime conveniente creando la conexion la cual sera mostrada despues al salir de la funcion.
+
+_Eliminar Caminos_ => En esta opcion se ejecuta la funcion para eliminar un camino entre 2 ciudades. Esto segun estime conveniente el usuario. En general el funcionamiento es el mismo que se utiliza en la funcion Conocer El Reino.
+
+_Consultar Rutas Existentes_ => En esta opcion se ejecuta la funcion para buscar Rutas entre ciudades la cual le permitiria al usuario revisar como llegar desde su ciudad a otra o revisar multiples conexiones entre ciudades.
+
 ## Solucion.
 Este proyecto se abordo en 3 grandes pasos:
 1. Identificacion.
@@ -55,27 +69,24 @@ Este proyecto se abordo en 3 grandes pasos:
 
 ### Identificacion.
 En esta parte, como su nombre indica se tenia que analizar e identificar el proyecto. Pensar en los tipos de datos a utilizar, funciones a realizar, algoritmos, logica, orden, secuencia.
-En esta etapa se llego a la idea de utilizar una lista como estructura de datos general para recibir la base de datos de las cartas. Posterior a esto se llego a la determinacion de utilizar **PILAS**.
-Las pilas serian de lo mas importante pues estas mismas nos permitirian mover datos entre una y otra para poder llevar a cabo el juego y poder implementar la logica,la secuencia y el orden.
-Por otra parte las funciones a realizar eran muchas desde agregar y quitar cartas hasta realizar operaciones entre ellas para llevar a cabo los ataques.
+En esta etapa se determinaron los siguientes puntos:
+(1) Se debe utilizar 3 tipos de estructuras las cuales son Arbol General y Arbol Binario. Tambien se llego a la conclusion de la utilizacion de un grafo no dirigido en conjunto con una matriz de adyacencia para reflejar las conexiones de este mismo.
+(2) Por su parte de los arboles tienen la siguiente designacion. El Arbol General va a ser utilizado para el orden jerarquico en base a el rango que tiene cada guardian ya sea "Aprendiz" o "Maestro". Luego el arbol binario va a ser utilizado para obtener la informacion de los guardianes y asi ordenarlos acorde a su estadistica de "Poder".
+(3) Ambos arboles van a ser utilizados tanto para funciones de recorrerlos, Busqueda y eliminacion acorde a lo que se necesite realizar en el proyecto.
+(4) Por otro lado el grafo y la matriz seran utilizados para recorrer, buscar y eliminar conexiones entre ciudades lo cual sera utilizado principalmente en acciones que tengan que ver directamente con el mundo.
 
 ### Implementacion.
 La parte mas importante de la **solucion* En terminos de tiempo esta misma fue la que mas se trabajo, debido a que se debio llevar a cabo todo lo descrito en la etapa anterior.
-Se crearon las estructuras de datos en conjunto con las funciones que permitirian un correcto desarrollo del juego. Pero con esto tambien se debio abordar el orden logico del programa.
-Se utilizaron funciones como **Push* y **Pop* para la manipulacion de datos al igual que iteradores que recorrian los mazos, manos y tableros dependiendo el caso.
+Para poder cumplir con todas las acciones que se solicitaban en este proyecto. Se tuvieron que crear funciones para las estructuras mencionadas anteriormente. Dichas funciones estaban enfocadas en recorrer, busqueda y eliminacion. Todas estas funciones las utilizamos para llevar a cabo acciones como las de "Conocer El Reino" en esta misma se utilizaron los grafos y matriz de adyacencia. En funciones como "Ver Lista de Candidatos" y "Ver al Guardian" se utilizaron las operaciones en arboles Y finalmente en "Presenciar batalla" se utilizaron todas y cada una de las funcionalidades descritas anteriormente.
 
 ### Ejecucion.
 Por su parte la ejecucion fue la etapa en donde los errores se identificaban y provocaba cambios en todo el programa. Cambios de logica, implementaciones y hasta tipos de datos.
 Todo esto se iba probando y ejecutando para verificar el correcto funcionamiento del juego al igual que las logicas implementadas. Se logro completar el juego con todas sus funciones y opciones disponibles.
+Teniendo en cuenta todos los detalles de la implementacion y las acciones que podia realizar el usuario en cada seccion del programa.
 Sin duda alguna esta fue la parte mas complicada de este largo proceso.
 
 ## Material extra
 A continuacion adjuntamos un link de acceso a un video en youtube en el cual se detalla todo lo implementado. Tambien se adjunta un link de acceso a el repositorio de **Github* que contiene todo el material del proyecto:
 
-https://github.com/JohnCooper25/The-Clash-Guardians/tree/main
-
-https://youtu.be/Mo-KK3t0b7Y
- 
- 
-
+https://github.com/JohnCooper25/Travel-Of-Guardians
 
