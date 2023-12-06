@@ -11,7 +11,7 @@
 
 -> luego debe marcar un tic en la parte de abajo que dice "añadir estos comandos a la linea de comandos del linker"
 
--> agregar la opcion "-std=c99"-> darle a aceptar.
+-> agregar la opcion "-std=c++11"-> darle a aceptar.
 
 (6) Ejecute el programa.
 
